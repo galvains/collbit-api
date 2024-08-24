@@ -1,6 +1,6 @@
 import random
 
-from sqlalchemy import delete, select, update
+from sqlalchemy import delete, update
 from sqlalchemy.orm import sessionmaker
 
 from utils import hash_password
@@ -28,7 +28,7 @@ def generate_random_ticket() -> dict:
     return dict_of_tickets
 
 
-def init_exchanges() -> None:
+def init_exchanges():
     list_of_exchanges = ['Binance', 'Bybit', 'Paxful', 'OKX', 'GateIo']
     exchanges_to_insert = [Exchanges(name=exchange) for exchange in list_of_exchanges]
 
@@ -38,11 +38,11 @@ def init_exchanges() -> None:
                 session.add_all(exchanges_to_insert)
                 session.commit()
     except Exception as ex:
-        print(ex)
         session.rollback()
+        return {'message': ex}
 
 
-def init_debug_tickets() -> None:
+def init_debug_tickets():
     tickets_to_insert = [DebugTickets(**generate_random_ticket()) for _ in range(30)]
 
     try:
@@ -53,8 +53,8 @@ def init_debug_tickets() -> None:
             session.add_all(tickets_to_insert)
             session.commit()
     except Exception as ex:
-        print(ex)
         session.rollback()
+        return {'message': ex}
 
 
 def db_get_all_tickets():
@@ -63,8 +63,8 @@ def db_get_all_tickets():
             all_tickets = session.query(DebugTickets).all()
             return all_tickets
     except Exception as ex:
-        print(ex)
         session.rollback()
+        return {'message': ex}
 
 
 def db_get_filtered_ticket(coin, currency, trade_type):
@@ -75,7 +75,8 @@ def db_get_filtered_ticket(coin, currency, trade_type):
             return filtered_tickets
 
     except Exception as ex:
-        print(ex)
+        session.rollback()
+        return {'message': ex}
 
 
 def db_add_new_user(telegram_id, username, password, role):
@@ -85,8 +86,8 @@ def db_add_new_user(telegram_id, username, password, role):
             session.add(new_user)
             session.commit()
     except Exception as ex:
-        print(ex)
         session.rollback()
+        return {'message': ex}
 
 
 def db_get_all_users():
@@ -95,8 +96,8 @@ def db_get_all_users():
             all_users = session.query(User).all()
             return all_users
     except Exception as ex:
-        print(ex)
         session.rollback()
+        return {'message': ex}
 
 
 def db_upd_user(user_update_filter, new_data):
@@ -115,7 +116,19 @@ def db_upd_user(user_update_filter, new_data):
                     session.execute(upd_query)
                 session.commit()
             else:
-                raise ValueError('User does not exist')
+                return {'message': 'User does not exist'}
     except Exception as ex:
-        print(ex)
         session.rollback()
+        return {'message': ex}
+
+
+def db_get_user(user_filter):
+    try:
+        with session_factory() as session:
+            user = session.query(User).filter_by(id=user_filter).first()
+            if not user:
+                return {'message': 'User does not exist'}
+            return user
+    except Exception as ex:
+        session.rollback()
+        return {'message': ex}

@@ -3,10 +3,9 @@ import os
 from enum import Enum
 from datetime import datetime
 from dotenv import load_dotenv
-from typing import Optional
 
 from pydantic import BaseModel
-from sqlalchemy import create_engine, ForeignKey, Integer, DateTime
+from sqlalchemy import create_engine, ForeignKey
 from sqlalchemy.types import JSON
 from sqlalchemy.orm import declarative_base, Mapped, mapped_column, relationship
 

@@ -5,7 +5,7 @@ from fastapi import FastAPI, Body
 from pydantic import ValidationError
 from models import Base, engine, User, UserRegistrationFilter, UserUpdateFilter, UserNewDataFilter
 from queries import init_exchanges, init_debug_tickets, db_get_all_tickets, db_get_filtered_ticket, db_add_new_user, \
-    db_get_all_users, db_upd_user
+    db_get_all_users, db_upd_user, db_get_user
 
 app = FastAPI()
 Base.metadata.create_all(engine)
@@ -42,6 +42,11 @@ def set_new_user(user: UserRegistrationFilter):
 @app.get('/api/v1/users')
 def get_all_users():
     return db_get_all_users()
+
+
+@app.get('/api/v1/user/{user_filter}')
+def get_user(user_filter: int):
+    return db_get_user(user_filter)
 
 
 @app.put('/api/v1/user')
