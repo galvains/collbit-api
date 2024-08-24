@@ -3,7 +3,8 @@ import random
 from sqlalchemy import delete, select
 from sqlalchemy.orm import sessionmaker
 
-from models import Tickets, Exchanges, DebugTickets, engine
+from utils import hash_password
+from models import Exchanges, DebugTickets, engine, User
 
 session_factory = sessionmaker(bind=engine)
 
@@ -75,3 +76,14 @@ def db_get_filtered_ticket(coin, currency, trade_type):
 
     except Exception as ex:
         print(ex)
+
+
+def db_add_new_user(telegram_id, username, password, role):
+    try:
+        with session_factory() as session:
+            new_user = User(telegram_id=telegram_id, username=username, password=hash_password(password), role=role)
+            session.add(new_user)
+            session.commit()
+    except Exception as ex:
+        print(ex)
+        session.rollback()

@@ -1,9 +1,11 @@
 import os
 
+from enum import Enum
 from datetime import datetime
 from dotenv import load_dotenv
 
-from sqlalchemy import create_engine, ForeignKey, Integer
+from pydantic import BaseModel
+from sqlalchemy import create_engine, ForeignKey, Integer, DateTime
 from sqlalchemy.types import JSON
 from sqlalchemy.orm import declarative_base, Mapped, mapped_column, relationship
 
@@ -12,22 +14,64 @@ Base = declarative_base()
 engine = create_engine(os.getenv('DATABASE_URL'))
 
 
-class Users(Base):
+class UserRoles(Enum):
+    user = 'user'
+    admin = 'admin'
+    staff = 'staff'
+
+
+class TypesSubscription(Enum):
+    lite = 'lite'
+    medium = 'medium'
+    hard = 'hard'
+
+
+class UserRegistration(BaseModel):
+    telegram_id: int
+    username: str
+    password: str | None
+    role: UserRoles
+
+    class Config:
+        use_enum_values = True
+
+
+class SubscriptionCreate(BaseModel):
+    user_id: int
+    subscription_type: TypesSubscription
+    end_date: datetime
+
+
+class User(Base):
     __tablename__ = 'users'
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    telegram_id: Mapped[int]
-    username: Mapped[str]
-    email: Mapped[str] = mapped_column(nullable=True)
+    telegram_id: Mapped[int] = mapped_column(unique=True)
+    username: Mapped[str] = mapped_column(unique=True)
     password: Mapped[str]
-    is_superuser: Mapped[bool] = mapped_column(default=False)
-    is_staff: Mapped[bool]
-    is_active: Mapped[bool]
+    role: Mapped[str]
     is_subscriber: Mapped[bool] = mapped_column(default=False)
-    last_login: Mapped[datetime]
-    date_joined: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    last_login: Mapped[datetime] = mapped_column(nullable=True)
+    date_joined: Mapped[datetime] = mapped_column(default=datetime.now)
+
+    subscription = relationship("Subscription", back_populates="user", uselist=False)
 
     def __repr__(self):
         return f"{self.username!r}"
+
+
+class Subscription(Base):
+    __tablename__ = 'subscriptions'
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    subscription_type: Mapped[str]
+    start_date: Mapped[datetime] = mapped_column(default=datetime.now)
+    end_date: Mapped[datetime]
+
+    user = relationship("User", back_populates="subscription")
+
+    def __repr__(self):
+        return f"{self.user_id}: {self.subscription_type}"
 
 
 class Tickets(Base):
@@ -46,9 +90,9 @@ class Tickets(Base):
     coin: Mapped[str]
     trade_type: Mapped[str]
     link: Mapped[str]
-    time_create: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    time_create: Mapped[datetime] = mapped_column(default=datetime.now)
 
-    # exchange_id = mapped_column(Integer, ForeignKey('exchanges.id'))
+    # exchange_id: Mapped[int] = mapped_column(ForeignKey('exchanges.id'))
     # exchange = relationship("Exchanges", back_populates="tickets")
 
     def __repr__(self):
@@ -83,8 +127,8 @@ class DebugTickets(Base):
     coin: Mapped[str]
     trade_type: Mapped[str]
     link: Mapped[str]
-    time_create: Mapped[datetime] = mapped_column(default=datetime.utcnow)
-    exchange_id = mapped_column(Integer, ForeignKey('exchanges.id'))
+    time_create: Mapped[datetime] = mapped_column(default=datetime.now)
+    exchange_id: Mapped[int] = mapped_column(ForeignKey('exchanges.id'))
 
     exchange = relationship("Exchanges", back_populates="tickets")
 
