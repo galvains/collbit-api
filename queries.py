@@ -1,10 +1,10 @@
 import random
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, update
 from sqlalchemy.orm import sessionmaker
 
 from utils import hash_password
-from models import Exchanges, DebugTickets, engine, User
+from models import Exchanges, DebugTickets, engine, User, UserRoles
 
 session_factory = sessionmaker(bind=engine)
 
@@ -84,6 +84,38 @@ def db_add_new_user(telegram_id, username, password, role):
             new_user = User(telegram_id=telegram_id, username=username, password=hash_password(password), role=role)
             session.add(new_user)
             session.commit()
+    except Exception as ex:
+        print(ex)
+        session.rollback()
+
+
+def db_get_all_users():
+    try:
+        with session_factory() as session:
+            all_users = session.query(User).all()
+            return all_users
+    except Exception as ex:
+        print(ex)
+        session.rollback()
+
+
+def db_upd_user(user_update_filter, new_data):
+    try:
+        user_id = user_update_filter.user_id
+
+        with session_factory() as session:
+            check_user = session.query(User).filter_by(id=user_id).first()
+            if check_user:
+                for key, value in new_data:
+                    if isinstance(value, UserRoles):
+                        value = value.value
+                    if key == 'password':
+                        value = hash_password(value)
+                    upd_query = update(User).where(User.id == user_id).values({key: value})
+                    session.execute(upd_query)
+                session.commit()
+            else:
+                raise ValueError('User does not exist')
     except Exception as ex:
         print(ex)
         session.rollback()

@@ -3,8 +3,9 @@ from typing import Optional
 from fastapi import FastAPI, Body
 
 from pydantic import ValidationError
-from models import Base, engine, User, UserRegistration
-from queries import init_exchanges, init_debug_tickets, db_get_all_tickets, db_get_filtered_ticket, db_add_new_user
+from models import Base, engine, User, UserRegistrationFilter, UserUpdateFilter, UserNewDataFilter
+from queries import init_exchanges, init_debug_tickets, db_get_all_tickets, db_get_filtered_ticket, db_add_new_user, \
+    db_get_all_users, db_upd_user
 
 app = FastAPI()
 Base.metadata.create_all(engine)
@@ -30,10 +31,20 @@ def get_filtered_ticket(coin: Optional[str] = 'USDT', currency: Optional[str] = 
 
 
 @app.post('/api/v1/user')
-def set_new_user(user: UserRegistration):
+def set_new_user(user: UserRegistrationFilter):
     try:
         db_add_new_user(**user.__dict__)
         return {'message': 'Success!', 'user': user}
     except ValidationError as ex:
         return ex.json()
 
+
+@app.get('/api/v1/users')
+def get_all_users():
+    return db_get_all_users()
+
+
+@app.put('/api/v1/user')
+def update_user(user_update_filter: UserUpdateFilter, new_data: UserNewDataFilter):
+    db_upd_user(user_update_filter, new_data)
+    return {'message': 'Success!', 'user': new_data}

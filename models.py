@@ -3,6 +3,7 @@ import os
 from enum import Enum
 from datetime import datetime
 from dotenv import load_dotenv
+from typing import Optional
 
 from pydantic import BaseModel
 from sqlalchemy import create_engine, ForeignKey, Integer, DateTime
@@ -26,7 +27,7 @@ class TypesSubscription(Enum):
     hard = 'hard'
 
 
-class UserRegistration(BaseModel):
+class UserRegistrationFilter(BaseModel):
     telegram_id: int
     username: str
     password: str | None
@@ -36,10 +37,22 @@ class UserRegistration(BaseModel):
         use_enum_values = True
 
 
-class SubscriptionCreate(BaseModel):
+class SubscriptionCreateFilter(BaseModel):
     user_id: int
     subscription_type: TypesSubscription
     end_date: datetime
+
+
+class UserUpdateFilter(BaseModel):
+    user_id: int
+
+
+class UserNewDataFilter(BaseModel):
+    username: str
+    password: str
+    role: UserRoles
+    is_subscriber: bool
+    last_login: datetime
 
 
 class User(Base):
