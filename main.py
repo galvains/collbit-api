@@ -1,11 +1,11 @@
 from typing import Optional
 
-from fastapi import FastAPI, Body
+from fastapi import FastAPI
 
 from pydantic import ValidationError
-from models import Base, engine, User, UserRegistrationFilter, UserUpdateFilter, UserNewDataFilter
+from models import Base, engine, User, UserRegistrationFilter, UserUpdateFilter, UserNewDataFilter, TicketCreateFilter
 from queries import init_exchanges, init_debug_tickets, db_get_all_tickets, db_get_filtered_ticket, db_add_new_user, \
-    db_get_all_users, db_upd_user, db_get_user
+    db_get_all_users, db_upd_user, db_get_user, db_add_new_ticket
 
 app = FastAPI()
 Base.metadata.create_all(engine)
@@ -24,10 +24,19 @@ def get_all_tickets():
 
 
 @app.get('/api/v1/ticket')
-def get_filtered_ticket(coin: Optional[str] = 'USDT', currency: Optional[str] = 'USD',
-                        trade_type: Optional[str] = 'BUY'):
-    total_data = db_get_filtered_ticket(coin.upper(), currency.upper(), trade_type.upper())
+def get_filtered_ticket(coin: Optional[str] = 'usdt', currency: Optional[str] = 'usd',
+                        trade_type: Optional[str] = 'sell'):
+    total_data = db_get_filtered_ticket(coin, currency, trade_type)
     return total_data
+
+
+@app.post('/api/v1/ticket')
+def set_new_ticket(ticket: TicketCreateFilter):
+    try:
+        db_add_new_ticket(**ticket.__dict__)
+        return {'message': 'Success!', 'ticket': ticket}
+    except ValidationError as ex:
+        return ex.json()
 
 
 @app.post('/api/v1/user')
