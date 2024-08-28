@@ -4,7 +4,7 @@ from sqlalchemy import delete, update
 from sqlalchemy.orm import sessionmaker
 
 from utils import hash_password
-from models import Exchanges, engine, User, UserRoles, Tickets
+from models import Exchanges, engine, User, UserRoles, Tickets, CoinTypes, CurrencyTypes, TradeTypes
 
 session_factory = sessionmaker(bind=engine)
 
@@ -67,11 +67,15 @@ def db_get_all_tickets():
         session.rollback()
 
 
-def db_get_filtered_ticket(coin, currency, trade_type):
+def db_get_filtered_ticket(**kwargs):
     try:
         with session_factory() as session:
-            filtered_tickets = session.query(Tickets).filter_by(coin=coin, currency=currency,
-                                                                trade_type=trade_type).all()
+            for key, value in kwargs.items():
+                if key != 'username':
+                    kwargs[key] = value.value
+
+            filtered_tickets = session.query(Tickets).filter_by(**kwargs).all()
+
             return filtered_tickets
 
     except Exception as ex:
@@ -89,6 +93,8 @@ def db_add_new_user(**kwargs):
             new_user = User(**kwargs)
             session.add(new_user)
             session.commit()
+            session.refresh(new_user)
+            return new_user
     except Exception as ex:
         print({'message': ex})
         session.rollback()
@@ -119,6 +125,8 @@ def db_upd_user(user_update_filter, new_data):
                     upd_query = update(User).where(User.id == user_id).values({key: value})
                     session.execute(upd_query)
                 session.commit()
+                session.refresh(check_user)
+                return check_user
             else:
                 print({'message': 'User does not exist'})
     except Exception as ex:
@@ -126,10 +134,10 @@ def db_upd_user(user_update_filter, new_data):
         session.rollback()
 
 
-def db_get_user(user_filter):
+def db_get_user(user_id):
     try:
         with session_factory() as session:
-            user = session.query(User).filter_by(id=user_filter).first()
+            user = session.query(User).filter_by(id=user_id).first()
             if not user:
                 return {'message': 'User does not exist'}
             return user

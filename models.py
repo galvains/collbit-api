@@ -2,6 +2,8 @@ import os
 
 from enum import Enum
 from datetime import datetime
+from typing import Optional
+
 from dotenv import load_dotenv
 
 from pydantic import BaseModel, HttpUrl
@@ -44,6 +46,13 @@ class CurrencyTypes(Enum):
     eur = 'eur'
     rub = 'rub'
     uah = 'uah'
+
+
+class GetTicketFilter(BaseModel):
+    username: Optional[str]
+    coin: Optional[CoinTypes]
+    currency: Optional[CurrencyTypes]
+    trade_type: Optional[TradeTypes]
 
 
 class SubscriptionCreateFilter(BaseModel):
@@ -89,6 +98,7 @@ class UserNewDataFilter(BaseModel):
 
 class User(Base):
     __tablename__ = 'users'
+    
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     telegram_id: Mapped[int] = mapped_column(unique=True)
     username: Mapped[str] = mapped_column(unique=True)
