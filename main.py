@@ -2,10 +2,10 @@ from fastapi import FastAPI, Depends, HTTPException
 
 from pydantic import ValidationError
 from models import Base, engine, UserRegistrationFilter, UserUpdateFilter, UserNewDataFilter, TicketCreateFilter, \
-    GetTicketFilter, TicketDeleteFilter
+    GetTicketFilter, TicketDeleteFilter, UserDeleteFilter
 
 from queries import init_exchanges, init_debug_tickets, db_get_all_tickets, db_get_filtered_ticket, db_add_new_user, \
-    db_get_all_users, db_upd_user, db_get_user, db_add_new_ticket, db_del_ticket
+    db_get_all_users, db_upd_user, db_get_user, db_add_new_ticket, db_del_ticket, db_del_user, db_del_all_users
 
 app = FastAPI()
 Base.metadata.create_all(engine)
@@ -88,3 +88,21 @@ def delete_ticket(ticket: TicketDeleteFilter):
         return {"status": "success"}
     else:
         raise HTTPException(status_code=400, detail="Error deleting ticket")
+
+
+@app.delete('/api/v1/user')
+def delete_user(user: UserDeleteFilter):
+    delete = db_del_user(user.key, user.value)
+    if delete:
+        return {"status": "success"}
+    else:
+        raise HTTPException(status_code=400, detail="Error deleting user")
+
+
+@app.delete('/api/v1/users')
+def delete_all_users():
+    delete_all = db_del_all_users()
+    if delete_all:
+        return {"status": "success"}
+    else:
+        raise HTTPException(status_code=400, detail="Error deleting user")

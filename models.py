@@ -93,6 +93,11 @@ class UserUpdateFilter(BaseModel):
     user_id: int
 
 
+class UserDeleteFilter(BaseModel):
+    key: str
+    value: Any
+
+
 class UserNewDataFilter(BaseModel):
     username: str
     password: str

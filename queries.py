@@ -162,3 +162,25 @@ def db_del_ticket(key, value):
     except Exception as ex:
         print({'message': ex})
         session.rollback()
+
+
+def db_del_user(key, value):
+    try:
+        with session_factory() as session:
+            deleted_count = session.query(User).filter_by(**{key: value}).delete(synchronize_session='fetch')
+            session.commit()
+            return deleted_count > 0
+    except Exception as ex:
+        print({'message': ex})
+        session.rollback()
+
+
+def db_del_all_users():
+    try:
+        with session_factory() as session:
+            deleted_count = session.query(User).delete(synchronize_session='fetch')
+            session.commit()
+            return deleted_count > 0
+    except Exception as ex:
+        print({'message': ex})
+        session.rollback()
