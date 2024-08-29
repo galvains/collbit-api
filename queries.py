@@ -156,3 +156,13 @@ def db_add_new_ticket(**kwargs):
     except Exception as ex:
         print({'message': ex})
         session.rollback()
+
+
+def db_del_ticket(key, value):
+    try:
+        with session_factory() as session:
+            session.query(Tickets).filter_by(**{key: value}).delete(synchronize_session='fetch')
+            session.commit()
+    except Exception as ex:
+        print({'message': ex})
+        session.rollback()

@@ -1,13 +1,13 @@
 from typing import Optional
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 
 from pydantic import ValidationError
 from models import Base, engine, User, UserRegistrationFilter, UserUpdateFilter, UserNewDataFilter, TicketCreateFilter, \
-    GetTicketFilter
+    GetTicketFilter, TicketDeleteFilter
 
 from queries import init_exchanges, init_debug_tickets, db_get_all_tickets, db_get_filtered_ticket, db_add_new_user, \
-    db_get_all_users, db_upd_user, db_get_user, db_add_new_ticket
+    db_get_all_users, db_upd_user, db_get_user, db_add_new_ticket, db_del_ticket
 
 app = FastAPI()
 Base.metadata.create_all(engine)
@@ -62,4 +62,10 @@ def update_user(user_update_filter: UserUpdateFilter, new_data: UserNewDataFilte
 @app.get('/api/v1/ticket')
 def get_filtered_ticket(filter_ticket: GetTicketFilter = Depends()):
     return db_get_filtered_ticket(**filter_ticket.__dict__)
+
+
+@app.delete('/api/v1/ticket')
+def delete_ticket(ticket: TicketDeleteFilter):
+    db_del_ticket(ticket.key, ticket.value)
+    return {'message': 'Deleted!', 'result': ticket}
 

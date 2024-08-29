@@ -2,7 +2,7 @@ import os
 
 from enum import Enum
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Any
 
 from dotenv import load_dotenv
 
@@ -77,6 +77,11 @@ class TicketCreateFilter(BaseModel):
     exchange_id: int
 
 
+class TicketDeleteFilter(BaseModel):
+    key: str
+    value: Any
+
+
 class UserRegistrationFilter(BaseModel):
     telegram_id: int
     username: str
@@ -98,7 +103,7 @@ class UserNewDataFilter(BaseModel):
 
 class User(Base):
     __tablename__ = 'users'
-    
+
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     telegram_id: Mapped[int] = mapped_column(unique=True)
     username: Mapped[str] = mapped_column(unique=True)
