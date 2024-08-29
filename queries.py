@@ -11,7 +11,7 @@ session_factory = sessionmaker(bind=engine)
 
 def generate_random_ticket() -> dict:
     dict_of_tickets = {
-        'username': 'John Doe',
+        'username': 'John_Doe',
         'price': random.randint(100, 300),
         'orders': random.randint(100, 300),
         'available': random.randint(100, 300),
@@ -73,9 +73,7 @@ def db_get_filtered_ticket(**kwargs):
             for key, value in kwargs.items():
                 if key != 'username':
                     kwargs[key] = value.value
-
             filtered_tickets = session.query(Tickets).filter_by(**kwargs).all()
-
             return filtered_tickets
 
     except Exception as ex:
@@ -94,7 +92,7 @@ def db_add_new_user(**kwargs):
             session.add(new_user)
             session.commit()
             session.refresh(new_user)
-            return new_user
+            return {'id': new_user.id, 'telegram_id': new_user.telegram_id, 'role': new_user.role}
     except Exception as ex:
         print({'message': ex})
         session.rollback()
@@ -126,9 +124,7 @@ def db_upd_user(user_update_filter, new_data):
                     session.execute(upd_query)
                 session.commit()
                 session.refresh(check_user)
-                return check_user
-            else:
-                print({'message': 'User does not exist'})
+                return {'id': check_user.id, 'telegram_id': check_user.telegram_id, 'role': check_user.role}
     except Exception as ex:
         print({'message': ex})
         session.rollback()
@@ -138,8 +134,6 @@ def db_get_user(user_id):
     try:
         with session_factory() as session:
             user = session.query(User).filter_by(id=user_id).first()
-            if not user:
-                return {'message': 'User does not exist'}
             return user
     except Exception as ex:
         print({'message': ex})
@@ -153,6 +147,7 @@ def db_add_new_ticket(**kwargs):
             new_ticket = Tickets(**kwargs)
             session.add(new_ticket)
             session.commit()
+            return new_ticket.id
     except Exception as ex:
         print({'message': ex})
         session.rollback()
@@ -161,8 +156,9 @@ def db_add_new_ticket(**kwargs):
 def db_del_ticket(key, value):
     try:
         with session_factory() as session:
-            session.query(Tickets).filter_by(**{key: value}).delete(synchronize_session='fetch')
+            deleted_count = session.query(Tickets).filter_by(**{key: value}).delete(synchronize_session='fetch')
             session.commit()
+            return deleted_count > 0
     except Exception as ex:
         print({'message': ex})
         session.rollback()
