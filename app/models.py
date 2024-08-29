@@ -77,11 +77,6 @@ class TicketCreateFilter(BaseModel):
     exchange_id: int
 
 
-class TicketDeleteFilter(BaseModel):
-    key: str
-    value: Any
-
-
 class UserRegistrationFilter(BaseModel):
     telegram_id: int
     username: str
@@ -91,11 +86,6 @@ class UserRegistrationFilter(BaseModel):
 
 class UserUpdateFilter(BaseModel):
     user_id: int
-
-
-class UserDeleteFilter(BaseModel):
-    key: str
-    value: Any
 
 
 class UserNewDataFilter(BaseModel):

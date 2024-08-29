@@ -3,8 +3,8 @@ import random
 from sqlalchemy import delete, update
 from sqlalchemy.orm import sessionmaker
 
-from utils import hash_password
-from models import Exchanges, engine, User, UserRoles, Tickets, CoinTypes, CurrencyTypes, TradeTypes
+from app.utils import hash_password
+from app.models import Exchanges, engine, User, UserRoles, Tickets
 
 session_factory = sessionmaker(bind=engine)
 
@@ -153,10 +153,10 @@ def db_add_new_ticket(**kwargs):
         session.rollback()
 
 
-def db_del_ticket(key, value):
+def db_del_ticket(ticket_id):
     try:
         with session_factory() as session:
-            deleted_count = session.query(Tickets).filter_by(**{key: value}).delete(synchronize_session='fetch')
+            deleted_count = session.query(Tickets).filter_by(id=ticket_id).delete(synchronize_session='fetch')
             session.commit()
             return deleted_count > 0
     except Exception as ex:
@@ -164,10 +164,10 @@ def db_del_ticket(key, value):
         session.rollback()
 
 
-def db_del_user(key, value):
+def db_del_user(user_id):
     try:
         with session_factory() as session:
-            deleted_count = session.query(User).filter_by(**{key: value}).delete(synchronize_session='fetch')
+            deleted_count = session.query(User).filter_by(id=user_id).delete(synchronize_session='fetch')
             session.commit()
             return deleted_count > 0
     except Exception as ex:
