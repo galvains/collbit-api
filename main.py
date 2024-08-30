@@ -4,7 +4,8 @@ from app.models import Base, engine, UserRegistrationFilter, UserUpdateFilter, U
     GetTicketFilter
 
 from app.queries import init_exchanges, init_debug_tickets, db_get_all_tickets, db_get_filtered_ticket, db_add_new_user, \
-    db_get_all_users, db_upd_user, db_get_user, db_add_new_ticket, db_del_ticket, db_del_user, db_del_all_users
+    db_get_all_users, db_upd_user, db_get_user, db_add_new_ticket, db_del_ticket, db_del_user, db_del_all_users, \
+    db_del_all_tickets
 
 app = FastAPI()
 Base.metadata.create_all(engine)
@@ -104,4 +105,13 @@ def delete_all_users():
     if delete_all:
         return {"status": "success"}
     else:
-        raise HTTPException(status_code=400, detail="Error deleting user")
+        raise HTTPException(status_code=400, detail="Error deleting users")
+
+
+@app.delete('/api/v1/tickets')
+def delete_all_tickets():
+    delete_all = db_del_all_tickets()
+    if delete_all:
+        return {"status": "success"}
+    else:
+        raise HTTPException(status_code=400, detail="Error deleting tickets")

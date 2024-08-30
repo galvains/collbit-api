@@ -2,18 +2,22 @@ import os
 
 from enum import Enum
 from datetime import datetime
-from typing import Optional, Any
+from typing import Optional, Annotated
 
 from dotenv import load_dotenv
 
 from pydantic import BaseModel, HttpUrl
-from sqlalchemy import create_engine, ForeignKey
+from sqlalchemy import create_engine, ForeignKey, func
 from sqlalchemy.types import JSON
 from sqlalchemy.orm import declarative_base, Mapped, mapped_column, relationship
 
 load_dotenv()
 Base = declarative_base()
 engine = create_engine(os.getenv('DATABASE_URL'))
+
+int_pk = Annotated[int, mapped_column(primary_key=True, autoincrement=True)]
+date_joined = Annotated[datetime, mapped_column(server_default=func.now())]
+last_login = Annotated[datetime, mapped_column(server_default=func.now(), onupdate=datetime.now)]
 
 
 class UserRoles(Enum):
@@ -99,25 +103,30 @@ class UserNewDataFilter(BaseModel):
 class User(Base):
     __tablename__ = 'users'
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id: Mapped[int_pk]
     telegram_id: Mapped[int] = mapped_column(unique=True)
     username: Mapped[str] = mapped_column(unique=True)
     password: Mapped[str]
     role: Mapped[str]
     is_subscriber: Mapped[bool] = mapped_column(default=False)
-    last_login: Mapped[datetime] = mapped_column(nullable=True)
-    date_joined: Mapped[datetime] = mapped_column(default=datetime.now)
+    last_login: Mapped[last_login]
+    date_joined: Mapped[date_joined]
 
     subscription = relationship("Subscription", back_populates="user", uselist=False)
 
+    def __str__(self):
+        return (f"{self.__class__.__name__}(id={self.id}, "
+                f"telegram_id={self.telegram_id!r},"
+                f"username={self.username!r})")
+
     def __repr__(self):
-        return f"{self.username!r}"
+        return str(self)
 
 
 class Subscription(Base):
     __tablename__ = 'subscriptions'
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id: Mapped[int_pk]
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     subscription_type: Mapped[str]
     start_date: Mapped[datetime] = mapped_column(default=datetime.now)
@@ -125,26 +134,37 @@ class Subscription(Base):
 
     user = relationship("User", back_populates="subscription")
 
+    def __str__(self):
+        return (f"{self.__class__.__name__}(id={self.id}, "
+                f"user_id={self.user_id!r},"
+                f"subscription_type={self.subscription_type!r}),"
+                f"start_date={self.start_date!r},"
+                f"end_date={self.end_date!r})")
+
     def __repr__(self):
-        return f"{self.user_id}: {self.subscription_type}"
+        return str(self)
 
 
 class Exchanges(Base):
     __tablename__ = 'exchanges'
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id: Mapped[int_pk]
     name: Mapped[str]
 
     tickets = relationship("Tickets", back_populates="exchange")
 
+    def __str__(self):
+        return (f"{self.__class__.__name__}(id={self.id}, "
+                f"name={self.name!r}")
+
     def __repr__(self):
-        return f"{self.__dict__!r}"
+        return str(self)
 
 
 class Tickets(Base):
     __tablename__ = 'tickets'
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id: Mapped[int_pk]
     username: Mapped[str]
     price: Mapped[float]
     orders: Mapped[int]
@@ -157,10 +177,18 @@ class Tickets(Base):
     coin: Mapped[CoinTypes]
     trade_type: Mapped[TradeTypes]
     link: Mapped[str]
-    time_create: Mapped[datetime] = mapped_column(default=datetime.now)
+    time_create: Mapped[date_joined]
     exchange_id: Mapped[int] = mapped_column(ForeignKey('exchanges.id'))
 
     exchange = relationship("Exchanges", back_populates="tickets")
 
+    def __str__(self):
+        return (f"{self.__class__.__name__}(id={self.id}, "
+                f"username={self.username!r},"
+                f"currency={self.currency!r}),"
+                f"coin={self.coin!r},"
+                f"trade_type={self.trade_type!r}),"
+                f"link={self.link!r}")
+
     def __repr__(self):
-        return f"{self.__dict__!r}"
+        return str(self)

@@ -16,6 +16,7 @@ def test_home():
 
 
 def test_can_get_all_tickets():
+    del_all_tickets()
     payload = {
         "username": "debug",
         "price": 0,
@@ -52,7 +53,7 @@ def test_can_add_new_user():
     assert response.json()['user']['id'] == user_filter
 
 
-def test_cat_upd_user():
+def test_can_upd_user():
     add_payload = {
         "telegram_id": random.randint(1, 9999),
         "username": f"debug_{random.randint(1, 9999)}",
@@ -177,3 +178,7 @@ def del_ticket(ticket_id):
 
 def del_all_users():
     return client.delete(ENDPOINT + '/api/v1/users')
+
+
+def del_all_tickets():
+    return client.delete(ENDPOINT + '/api/v1/tickets')
