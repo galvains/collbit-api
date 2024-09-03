@@ -7,7 +7,7 @@ from typing import Optional, Annotated
 from dotenv import load_dotenv
 
 from pydantic import BaseModel, HttpUrl
-from sqlalchemy import create_engine, ForeignKey, func
+from sqlalchemy import ForeignKey, func
 from sqlalchemy.types import JSON
 from sqlalchemy.orm import declarative_base, Mapped, mapped_column, relationship
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -123,6 +123,17 @@ class User(Base):
     def __repr__(self):
         return str(self)
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "telegram_id": self.telegram_id,
+            "username": self.username,
+            "role": self.role,
+            "is_subscriber": self.is_subscriber,
+            "last_login": self.last_login,
+            "date_joined": self.date_joined,
+        }
+
 
 class Subscription(Base):
     __tablename__ = 'subscriptions'
@@ -145,6 +156,15 @@ class Subscription(Base):
     def __repr__(self):
         return str(self)
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "subscription_type": self.subscription_type,
+            "start_date": self.start_date,
+            "end_date": self.end_date,
+        }
+
 
 class Exchanges(Base):
     __tablename__ = 'exchanges'
@@ -160,6 +180,12 @@ class Exchanges(Base):
 
     def __repr__(self):
         return str(self)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+        }
 
 
 class Tickets(Base):
@@ -193,3 +219,22 @@ class Tickets(Base):
 
     def __repr__(self):
         return str(self)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "username": self.username,
+            "price": self.price,
+            "orders": self.orders,
+            "available": self.available,
+            "max_limit": self.max_limit,
+            "min_limit": self.min_limit,
+            "rate": self.rate,
+            "pay_methods": self.pay_methods,
+            "currency": self.currency,
+            "coin": self.coin,
+            "trade_type": self.trade_type,
+            "link": self.link,
+            "time_create": self.time_create,
+            "exchange_id": self.exchange_id,
+        }
