@@ -10,10 +10,11 @@ from pydantic import BaseModel, HttpUrl
 from sqlalchemy import create_engine, ForeignKey, func
 from sqlalchemy.types import JSON
 from sqlalchemy.orm import declarative_base, Mapped, mapped_column, relationship
+from sqlalchemy.ext.asyncio import create_async_engine
 
 load_dotenv()
 Base = declarative_base()
-engine = create_engine(os.getenv('DATABASE_URL'))
+engine = create_async_engine(os.getenv('DATABASE_URL'))
 
 int_pk = Annotated[int, mapped_column(primary_key=True, autoincrement=True)]
 date_joined = Annotated[datetime, mapped_column(server_default=func.now())]

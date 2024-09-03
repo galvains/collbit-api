@@ -124,7 +124,7 @@ def test_can_del_user():
     del_user(user_filter)
 
     del_response = client.get(ENDPOINT + f'/api/v1/user/{user_filter}')
-    assert del_response.status_code == 204
+    assert del_response.status_code == 404
 
 
 def test_can_del_ticket():
@@ -153,7 +153,7 @@ def test_can_del_ticket():
 
     del_response = client.get(
         ENDPOINT + f"/api/v1/ticket?username={add_payload['username']}&coin=usdt&currency=usd&trade_type=buy")
-    assert del_response.status_code == 204
+    assert del_response.status_code == 404
 
 
 def add_tickets(payload):
