@@ -1,0 +1,15 @@
+from enum import Enum
+from pydantic import BaseModel
+from datetime import datetime
+
+
+class TypesSubscription(Enum):
+    lite = 'lite'
+    medium = 'medium'
+    hard = 'hard'
+
+
+class SubscriptionCreateFilter(BaseModel):
+    user_id: int
+    subscription_type: TypesSubscription
+    end_date: datetime
