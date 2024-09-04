@@ -17,7 +17,7 @@ async def get_all_subscriptions():
 
 @router.get("/subscription/{subscription_id}", summary="Get subscription")
 async def get_all_subscriptions(subscription_id: int):
-    subscription = await db_get_subscriptions(subscription_id)
+    subscription = await db_get_subscription(subscription_id)
     if subscription:
         return {"status": "success", 'subscription': subscription}
     else:

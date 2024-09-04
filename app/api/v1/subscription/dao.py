@@ -1,12 +1,10 @@
 from datetime import datetime
-from http import HTTPStatus
 
 from sqlalchemy import select, delete, update
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.api.v1.subscription.models import Subscription
 from app.api.v1.subscription.schemas import TypesSubscription
-from app.api.v1.users.dao import db_upd_user
 from app.api.v1.users.models import User
 from app.datebase import async_session_factory
 
@@ -23,7 +21,7 @@ async def db_get_all_subscriptions():
         await session.rollback()
 
 
-async def db_get_subscriptions(subscription_id: int):
+async def db_get_subscription(subscription_id: int):
     try:
         async with async_session_factory() as session:
             query = await session.execute(select(Subscription).filter_by(id=subscription_id))
@@ -63,7 +61,7 @@ async def db_add_new_subscription(**kwargs):
             return {'id': new_subscription.id,
                     'subscription_type': new_subscription.subscription_type,
                     'start_date': new_subscription.start_date,
-                    'end_date': new_subscription.end_date, }
+                    'end_date': new_subscription.end_date,}
 
     except SQLAlchemyError as ex:
         print({'message': ex})

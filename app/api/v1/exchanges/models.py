@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy.orm import Mapped, relationship, mapped_column
 
 from app.datebase import Base, int_pk
 
@@ -7,7 +7,7 @@ class Exchanges(Base):
     __tablename__ = 'exchanges'
 
     id: Mapped[int_pk]
-    name: Mapped[str]
+    name: Mapped[str] = mapped_column(unique=True, nullable=False)
 
     tickets = relationship("Tickets", back_populates="exchange")
 
