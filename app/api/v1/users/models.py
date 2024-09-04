@@ -1,3 +1,4 @@
+from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.datebase import Base, int_pk, last_login, date_joined
@@ -12,9 +13,9 @@ class User(Base):
     username: Mapped[str] = mapped_column(unique=True)
     password: Mapped[str]
     role: Mapped[str]
-    is_subscriber: Mapped[bool] = mapped_column(default=False)
     last_login: Mapped[last_login]
     date_joined: Mapped[date_joined]
+    subscription_id: Mapped[int] = mapped_column(ForeignKey('subscriptions.id', ondelete='SET NULL'), nullable=True)
 
     subscription = relationship("Subscription", back_populates="user", uselist=False)
 
@@ -32,7 +33,7 @@ class User(Base):
             "telegram_id": self.telegram_id,
             "username": self.username,
             "role": self.role,
-            "is_subscriber": self.is_subscriber,
             "last_login": self.last_login,
             "date_joined": self.date_joined,
+            "subscription_id": self.subscription_id,
         }

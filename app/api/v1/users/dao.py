@@ -4,7 +4,7 @@ from sqlalchemy import select, update, delete
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.api.v1.users.models import User
-from app.api.v1.users.schemas import UserRoles
+from app.api.v1.users.schemas import UserRoles, UserUpdateFilter
 from app.datebase import async_session_factory
 from app.utils import hash_password
 
@@ -40,6 +40,7 @@ async def db_get_all_users():
 
 async def db_upd_user(user_update_filter, new_data):
     try:
+
         user_id = user_update_filter.user_id
 
         async with async_session_factory() as session:
@@ -48,6 +49,7 @@ async def db_upd_user(user_update_filter, new_data):
 
             if check_user:
                 for key, value in new_data:
+
                     if isinstance(value, UserRoles):
                         value = value.value
                     if isinstance(value, datetime):

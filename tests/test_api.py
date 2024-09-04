@@ -45,8 +45,10 @@ def test_can_add_new_user():
         "telegram_id": random.randint(1, 9999),
         "username": f"debug_{random.randint(1, 9999)}",
         "password": "string",
-        "role": "admin"
+        "role": "admin",
+        "subscription_id": None
     }
+    # print(add_tickets(payload).json())
     user_filter = add_users(payload).json()['user']['id']
     response = client.get(ENDPOINT + f'/api/v1/user/{user_filter}')
     assert response.status_code == 200
@@ -58,7 +60,8 @@ def test_can_upd_user():
         "telegram_id": random.randint(1, 9999),
         "username": f"debug_{random.randint(1, 9999)}",
         "password": "string",
-        "role": "admin"
+        "role": "admin",
+        "subscription_id": None
     }
     user_filter = add_users(add_payload).json()['user']['id']
     add_response = client.get(ENDPOINT + f'/api/v1/user/{user_filter}')
@@ -72,8 +75,9 @@ def test_can_upd_user():
             "username": f"upd_debug_{random.randint(1, 9999)}",
             "password": "new_string",
             "role": "staff",
-            "is_subscriber": True,
-            "last_login": "2024-08-28T08:31:11.481Z"
+            "last_login": "2024-08-28T08:31:11.481Z",
+            "subscription_id": None
+
         }
     }
 
@@ -92,13 +96,15 @@ def test_can_get_all_users():
         "telegram_id": random.randint(1, 9999),
         "username": f"debug_{random.randint(1, 9999)}",
         "password": "string",
-        "role": "admin"
+        "role": "admin",
+        "subscription_id": None
     }
     payload_2 = {
         "telegram_id": random.randint(1, 9999),
         "username": f"debug_{random.randint(1, 9999)}",
         "password": "string",
-        "role": "admin"
+        "role": "admin",
+        "subscription_id": None
     }
     add_users(payload_1)
     add_users(payload_2)
