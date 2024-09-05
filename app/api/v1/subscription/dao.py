@@ -98,7 +98,7 @@ async def db_upd_subscription(subscription_update_filter, new_data):
 
                 await session.commit()
                 await session.refresh(check_subscription)
-                return {'id': check_subscription.id}
+                return {'id': check_subscription.id, 'subscription_type': check_subscription.subscription_type}
     except SQLAlchemyError as ex:
         print({'message': ex})
         await session.rollback()

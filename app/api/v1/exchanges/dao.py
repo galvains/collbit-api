@@ -97,7 +97,7 @@ async def db_upd_exchange(exchange_update_filter, new_data):
 
                 await session.commit()
                 await session.refresh(check_exchange)
-                return {'id': check_exchange.id}
+                return {'id': check_exchange.id, 'name': check_exchange.name}
     except SQLAlchemyError as ex:
         print({'message': ex})
         await session.rollback()

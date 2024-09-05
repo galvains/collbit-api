@@ -28,7 +28,7 @@ async def get_all_exchanges(exchange_id: int):
 async def create_exchange(exchange: ExchangeCreateFilter):
     new_exchange = await db_add_new_exchange(**exchange.__dict__)
     if new_exchange:
-        return {"status": "success", 'exchange_id': new_exchange}
+        return {"status": "success", 'exchange': new_exchange}
     else:
         raise HTTPException(status_code=404, detail='Error added exchange')
 

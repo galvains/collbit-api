@@ -28,7 +28,7 @@ async def get_all_subscriptions(subscription_id: int):
 async def create_subscription(subscription: SubscriptionCreateFilter):
     new_subscription = await db_add_new_subscription(**subscription.__dict__)
     if new_subscription:
-        return {"status": "success", 'subscription_id': new_subscription}
+        return {"status": "success", 'subscription': new_subscription}
     else:
         raise HTTPException(status_code=404, detail='Error added subscription')
 

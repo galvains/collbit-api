@@ -1,10 +1,6 @@
 import random
 import httpx
 
-# from fastapi.testclient import TestClient
-# from main import app
-# client = TestClient(app)
-
 client = httpx.Client()
 ENDPOINT = "http://localhost:8000"
 
@@ -15,7 +11,61 @@ def test_home():
     assert response.json()['status'] == 'success'
 
 
-def test_can_get_all_tickets():
+def test_can_add_new_user():
+    payload = {
+        "telegram_id": random.randint(1, 9999),
+        "username": f"debug_{random.randint(1, 9999)}",
+        "password": "string",
+        "role": "admin",
+        "subscription_id": None
+    }
+    user_filter = add_users(payload).json()['user']['id']
+    response = client.get(ENDPOINT + f'/api/v1/user/{user_filter}')
+    assert response.status_code == 200
+    assert response.json()['user']['id'] == user_filter
+
+
+def test_can_add_new_subscription():
+    user_payload = {
+        "telegram_id": random.randint(1, 9999),
+        "username": f"debug_{random.randint(1, 9999)}",
+        "password": "string",
+        "role": "admin",
+        "subscription_id": None
+    }
+
+    user_filter = add_users(user_payload).json()['user']['id']
+    user_response = client.get(ENDPOINT + f'/api/v1/user/{user_filter}')
+    assert user_response.status_code == 200
+
+    sub_payload = {
+        "user_id": user_response.json()['user']['id'],
+        "subscription_type": "hard",
+        "end_date": "2030-01-01T00:00:00.000Z"
+    }
+
+    subscriptions_filter = add_subscriptions(sub_payload).json()['subscription']['id']
+    sub_response = client.get(ENDPOINT + f'/api/v1/subscription/{subscriptions_filter}')
+    assert sub_response.status_code == 200
+    assert sub_response.json()['subscription']['id'] == subscriptions_filter
+
+    user_response = client.get(ENDPOINT + f'/api/v1/user/{user_filter}')
+    assert user_response.status_code == 200
+    assert user_response.json()['user']['subscription_id'] == subscriptions_filter
+
+
+def test_can_add_new_exchange():
+    payload = {
+        "name": f"debug_{random.randint(1, 9999)}",
+    }
+    exchange_filter = add_exchanges(payload).json()['exchange']['id']
+    response = client.get(ENDPOINT + f'/api/v1/exchange/{exchange_filter}')
+
+    assert response.status_code == 200
+    assert response.json()['exchange']['id'] == exchange_filter
+
+
+def test_can_add_new_ticket():
     del_all_tickets()
     payload = {
         "username": "debug",
@@ -26,33 +76,17 @@ def test_can_get_all_tickets():
         "min_limit": 0,
         "rate": 0,
         "pay_methods": {},
-        "currency": "usd",
-        "coin": "usdt",
-        "trade_type": "buy",
+        "currency": "eur",
+        "coin": "usdc",
+        "trade_type": "sell",
         "link": "https://debug.com/",
         "exchange_id": 1
     }
-    for _ in range(10):
-        add_tickets(payload)
+    ticket_filter = add_tickets(payload).json()['ticket_id']
+    response = client.get(ENDPOINT + '/api/v1/ticket?username=debug&coin=usdc&currency=eur&trade_type=sell')
 
-    response = client.get(ENDPOINT + '/api/v1/ticket?username=debug&coin=usdt&currency=usd&trade_type=buy')
     assert response.status_code == 200
-    assert len(response.json()['tickets']) == 10
-
-
-def test_can_add_new_user():
-    payload = {
-        "telegram_id": random.randint(1, 9999),
-        "username": f"debug_{random.randint(1, 9999)}",
-        "password": "string",
-        "role": "admin",
-        "subscription_id": None
-    }
-    # print(add_tickets(payload).json())
-    user_filter = add_users(payload).json()['user']['id']
-    response = client.get(ENDPOINT + f'/api/v1/user/{user_filter}')
-    assert response.status_code == 200
-    assert response.json()['user']['id'] == user_filter
+    assert response.json()['tickets'][0]['id'] == ticket_filter
 
 
 def test_can_upd_user():
@@ -90,6 +124,101 @@ def test_can_upd_user():
     assert upd_response.json()['user']['telegram_id'] == update_user_telegram_id
 
 
+def test_can_upd_subscription():
+    user_payload = {
+        "telegram_id": random.randint(1, 9999),
+        "username": f"debug_{random.randint(1, 9999)}",
+        "password": "string",
+        "role": "admin",
+        "subscription_id": None
+    }
+
+    user_filter = add_users(user_payload).json()['user']['id']
+    user_response = client.get(ENDPOINT + f'/api/v1/user/{user_filter}')
+    assert user_response.status_code == 200
+
+    sub_payload = {
+        "user_id": user_response.json()['user']['id'],
+        "subscription_type": "hard",
+        "end_date": "2030-01-01T00:00:00.000Z"
+    }
+
+    subscriptions_filter = add_subscriptions(sub_payload).json()['subscription']['id']
+    sub_response = client.get(ENDPOINT + f'/api/v1/subscription/{subscriptions_filter}')
+    assert sub_response.status_code == 200
+    assert sub_response.json()['subscription']['id'] == subscriptions_filter
+
+    upd_sub_payload = {
+        "subscription_update_filter": {
+            "subscription_id": subscriptions_filter
+        },
+        "new_data": {
+            "subscription_type": "medium",
+            "start_date": "2000-01-01T00:00:00.000Z",
+            "end_date": "2030-01-01T00:00:00.000Z"
+        }
+    }
+
+    total_upd_sub = upd_subscription(upd_sub_payload).json()
+    upd_sub_filter = total_upd_sub['subscription']['id']
+    upd_sub_type = total_upd_sub['subscription']['subscription_type']
+
+    sub_response = client.get(ENDPOINT + f'/api/v1/subscription/{subscriptions_filter}')
+    assert sub_response.status_code == 200
+    assert sub_response.json()['subscription']['id'] == upd_sub_filter
+    assert sub_response.json()['subscription']['subscription_type'] == upd_sub_type
+
+
+def test_can_upd_exchange():
+    payload = {
+        "name": f"debug_{random.randint(1, 9999)}",
+    }
+    exchange_filter = add_exchanges(payload).json()['exchange']['id']
+    response = client.get(ENDPOINT + f'/api/v1/exchange/{exchange_filter}')
+
+    assert response.status_code == 200
+    assert response.json()['exchange']['id'] == exchange_filter
+
+    upd_payload = {
+        "exchange_update_filter": {
+            "exchange_id": 4
+        },
+        "new_data": {
+            "name": "new_data_name"
+        }
+    }
+
+    upd_exchange_filter = upd_exchange(upd_payload).json()['exchange']['id']
+    upd_response = client.get(ENDPOINT + f'/api/v1/exchange/{upd_exchange_filter}')
+    assert upd_response.status_code == 200
+    assert upd_response.json()['exchange']['name'] == upd_payload['new_data']['name']
+
+
+def test_can_get_all_tickets():
+    del_all_tickets()
+    payload = {
+        "username": "debug",
+        "price": 0,
+        "orders": 0,
+        "available": 0,
+        "max_limit": 0,
+        "min_limit": 0,
+        "rate": 0,
+        "pay_methods": {},
+        "currency": "usd",
+        "coin": "usdt",
+        "trade_type": "buy",
+        "link": "https://debug.com/",
+        "exchange_id": 1
+    }
+    for _ in range(10):
+        add_tickets(payload)
+
+    response = client.get(ENDPOINT + '/api/v1/ticket?username=debug&coin=usdt&currency=usd&trade_type=buy')
+    assert response.status_code == 200
+    assert len(response.json()['tickets']) == 10
+
+
 def test_can_get_all_users():
     del_all_users()
     payload_1 = {
@@ -114,6 +243,90 @@ def test_can_get_all_users():
     assert len(response.json()['users']) == 2
     assert response.json()['users'][0]['telegram_id'] == payload_1['telegram_id']
     assert response.json()['users'][1]['telegram_id'] == payload_2['telegram_id']
+
+
+def test_can_get_user():
+    user_payload = {
+        "telegram_id": random.randint(1, 9999),
+        "username": f"debug_{random.randint(1, 9999)}",
+        "password": "string",
+        "role": "admin",
+        "subscription_id": None
+    }
+    add_users(user_payload)
+
+    user_filter = None
+    response = client.get(ENDPOINT + '/api/v1/users')
+    for user in response.json()['users']:
+        if user['telegram_id'] == user_payload['telegram_id']:
+            user_filter = user['id']
+
+    response = client.get(ENDPOINT + f'/api/v1/user/{user_filter}')
+    assert response.status_code == 200
+    assert response.json()['user']['id'] == user_filter
+
+
+def test_can_get_ticket():
+    payload = {
+        "username": "debug",
+        "price": 0,
+        "orders": 0,
+        "available": 0,
+        "max_limit": 0,
+        "min_limit": 0,
+        "rate": 0,
+        "pay_methods": {},
+        "currency": "eur",
+        "coin": "usdc",
+        "trade_type": "sell",
+        "link": "https://debug.com/",
+        "exchange_id": 1
+    }
+    ticket_filter = add_tickets(payload).json()['ticket_id']
+    response = client.get(ENDPOINT + '/api/v1/ticket?username=debug&coin=usdc&currency=eur&trade_type=sell')
+
+    assert response.status_code == 200
+    assert response.json()['tickets'][0]['id'] == ticket_filter
+
+
+def test_can_get_exchange():
+    payload = {
+        "name": f"debug_{random.randint(1, 9999)}",
+    }
+    exchange_filter = add_exchanges(payload).json()['exchange']['id']
+    response = client.get(ENDPOINT + f'/api/v1/exchange/{exchange_filter}')
+
+    assert response.status_code == 200
+    assert response.json()['exchange']['id'] == exchange_filter
+
+
+def test_can_get_subscription():
+    user_payload = {
+        "telegram_id": random.randint(1, 9999),
+        "username": f"debug_{random.randint(1, 9999)}",
+        "password": "string",
+        "role": "admin",
+        "subscription_id": None
+    }
+
+    user_filter = add_users(user_payload).json()['user']['id']
+    user_response = client.get(ENDPOINT + f'/api/v1/user/{user_filter}')
+    assert user_response.status_code == 200
+
+    sub_payload = {
+        "user_id": user_response.json()['user']['id'],
+        "subscription_type": "hard",
+        "end_date": "2030-01-01T00:00:00.000Z"
+    }
+
+    subscriptions_filter = add_subscriptions(sub_payload).json()['subscription']['id']
+    sub_response = client.get(ENDPOINT + f'/api/v1/subscription/{subscriptions_filter}')
+    assert sub_response.status_code == 200
+    assert sub_response.json()['subscription']['id'] == subscriptions_filter
+
+    user_response = client.get(ENDPOINT + f'/api/v1/user/{user_filter}')
+    assert user_response.status_code == 200
+    assert user_response.json()['user']['subscription_id'] == subscriptions_filter
 
 
 def test_can_del_user():
@@ -162,6 +375,68 @@ def test_can_del_ticket():
     assert del_response.status_code == 404
 
 
+def test_can_del_subscription():
+    user_payload = {
+        "telegram_id": random.randint(1, 9999),
+        "username": f"debug_{random.randint(1, 9999)}",
+        "password": "string",
+        "role": "admin",
+        "subscription_id": None
+    }
+
+    user_filter = add_users(user_payload).json()['user']['id']
+    user_response = client.get(ENDPOINT + f'/api/v1/user/{user_filter}')
+    assert user_response.status_code == 200
+
+    sub_payload = {
+        "user_id": user_response.json()['user']['id'],
+        "subscription_type": "hard",
+        "end_date": "2030-01-01T00:00:00.000Z"
+    }
+
+    subscriptions_filter = add_subscriptions(sub_payload).json()['subscription']['id']
+    sub_response = client.get(ENDPOINT + f'/api/v1/subscription/{subscriptions_filter}')
+    assert sub_response.status_code == 200
+    assert sub_response.json()['subscription']['id'] == subscriptions_filter
+
+    user_response = client.get(ENDPOINT + f'/api/v1/user/{user_filter}')
+    assert user_response.status_code == 200
+    assert user_response.json()['user']['subscription_id'] == subscriptions_filter
+
+    del_subscription(subscriptions_filter)
+    sub_response = client.get(ENDPOINT + f'/api/v1/subscription/{subscriptions_filter}')
+    assert sub_response.status_code == 404
+
+
+def test_can_del_exchange():
+    payload = {
+        "name": f"debug_{random.randint(1, 9999)}",
+    }
+    exchange_filter = add_exchanges(payload).json()['exchange']['id']
+    response = client.get(ENDPOINT + f'/api/v1/exchange/{exchange_filter}')
+
+    assert response.status_code == 200
+    assert response.json()['exchange']['id'] == exchange_filter
+
+    del_exchange(exchange_filter)
+    response = client.get(ENDPOINT + f'/api/v1/exchange/{exchange_filter}')
+    assert response.status_code == 404
+
+
+def test_can_del_all_tickets():
+    del_all_tickets()
+
+    response = client.get(ENDPOINT + f'/api/v1/tickets')
+    assert response.status_code == 404
+
+
+def test_can_del_all_users():
+    del_all_users()
+
+    response = client.get(ENDPOINT + f'/api/v1/users')
+    assert response.status_code == 404
+
+
 def add_tickets(payload):
     return client.post(ENDPOINT + '/api/v1/ticket', json=payload)
 
@@ -170,8 +445,24 @@ def add_users(payload):
     return client.post(ENDPOINT + '/api/v1/user', json=payload)
 
 
+def add_subscriptions(payload):
+    return client.post(ENDPOINT + '/api/v1/subscription', json=payload)
+
+
+def add_exchanges(payload):
+    return client.post(ENDPOINT + '/api/v1/exchange', json=payload)
+
+
 def upd_user(payload):
     return client.put(ENDPOINT + '/api/v1/user', json=payload)
+
+
+def upd_subscription(payload):
+    return client.put(ENDPOINT + '/api/v1/subscription', json=payload)
+
+
+def upd_exchange(payload):
+    return client.put(ENDPOINT + '/api/v1/exchange', json=payload)
 
 
 def del_user(user_id):
@@ -180,6 +471,14 @@ def del_user(user_id):
 
 def del_ticket(ticket_id):
     return client.delete(ENDPOINT + f'/api/v1/ticket/{ticket_id}')
+
+
+def del_subscription(subscription_id):
+    return client.delete(ENDPOINT + f'/api/v1/subscription/{subscription_id}')
+
+
+def del_exchange(exchange_id):
+    return client.delete(ENDPOINT + f'/api/v1/exchange/{exchange_id}')
 
 
 def del_all_users():
