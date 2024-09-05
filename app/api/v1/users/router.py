@@ -1,18 +1,19 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 
-from app.api.v1.users.dao import *
+from app.api.v1.users.dao import db_get_all_users, db_get_user, db_upd_user, db_del_user, db_del_all_users
 from app.api.v1.users.schemas import UserRegistrationFilter, UserNewDataFilter, UserUpdateFilter
-
+from app.api.v1.users.models import User
+from app.api.v1.users.auth import is_default_user, is_admin_user
 router = APIRouter()
 
 
-@router.post('/user', summary="Set new user")
-async def set_new_user(user: UserRegistrationFilter):
-    new_user = await db_add_new_user(**user.__dict__)
-    if new_user:
-        return {"status": "success", 'user': new_user}
-    else:
-        raise HTTPException(status_code=400, detail='User already exists')
+# @router.post('/user', summary="Set new user")
+# async def set_new_user(user: UserRegistrationFilter):
+#     new_user = await db_add_new_user(**user.__dict__)
+#     if new_user:
+#         return {"status": "success", 'user': new_user}
+#     else:
+#         raise HTTPException(status_code=400, detail='User already exists')
 
 
 @router.get('/users', summary="Get all users")

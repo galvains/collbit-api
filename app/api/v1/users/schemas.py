@@ -5,8 +5,8 @@ from pydantic import BaseModel
 
 class UserRoles(Enum):
     user = 'user'
-    admin = 'admin'
     staff = 'staff'
+    admin = 'admin'
 
 
 class UserRegistrationFilter(BaseModel):
@@ -26,3 +26,8 @@ class UserNewDataFilter(BaseModel):
     role: UserRoles
     last_login: datetime
     subscription_id: int | None
+
+
+class UserAuthFilter(BaseModel):
+    telegram_id: int
+    password: str

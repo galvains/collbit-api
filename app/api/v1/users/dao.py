@@ -6,11 +6,12 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.api.v1.users.models import User
 from app.api.v1.users.schemas import UserRoles, UserUpdateFilter
 from app.datebase import async_session_factory
-from app.utils import hash_password
+from app.api.v1.users.auth import get_password_hash
 
 
 async def db_add_new_user(**kwargs):
-    kwargs['password'] = hash_password(kwargs['password'])
+    kwargs['password'] = get_password_hash(kwargs['password'])
+
     if isinstance(kwargs.get('role'), UserRoles):
         kwargs['role'] = kwargs['role'].value
 
@@ -55,7 +56,7 @@ async def db_upd_user(user_update_filter, new_data):
                     if isinstance(value, datetime):
                         value = value.replace(tzinfo=None)
                     if key == 'password':
-                        value = hash_password(value)
+                        value = get_password_hash(value)
 
                     await session.execute(update(User).where(User.id == user_id).values({key: value}))
 
@@ -71,6 +72,17 @@ async def db_get_user(user_id):
     try:
         async with async_session_factory() as session:
             query = await session.execute(select(User).filter_by(id=user_id))
+            user = query.scalars().first()
+            return user
+    except SQLAlchemyError as ex:
+        print({'message': ex})
+        await session.rollback()
+
+
+async def db_get_user_by_any_filter(**filter_by):
+    try:
+        async with async_session_factory() as session:
+            query = await session.execute(select(User).filter_by(**filter_by))
             user = query.scalars().first()
             return user
     except SQLAlchemyError as ex:

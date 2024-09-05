@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from app.api.v1.exchanges.dao import init_exchanges
 from app.api.v1.tickets.dao import init_debug_tickets
 from app.datebase import Base, engine
-from app.api.v1 import router as router_v1
+from app.api.v1 import api_router as router_v1, auth_router as auth_router
 
 
 @asynccontextmanager
@@ -19,6 +19,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 app.include_router(router_v1, prefix="/api/v1")
+app.include_router(auth_router, prefix="/auth")
 
 
 @app.get('/', tags=['Main'])
