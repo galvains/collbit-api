@@ -25,10 +25,10 @@ class CurrencyTypes(Enum):
 
 
 class GetTicketFilter(BaseModel):
-    username: Optional[str]
-    coin: Optional[CoinTypes]
-    currency: Optional[CurrencyTypes]
-    trade_type: Optional[TradeTypes]
+    username: Optional[str] = None
+    coin: Optional[CoinTypes] = None
+    currency: Optional[CurrencyTypes] = None
+    trade_type: Optional[TradeTypes] = None
 
 
 class TicketCreateFilter(BaseModel):

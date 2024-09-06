@@ -28,7 +28,9 @@ async def set_new_ticket(ticket: TicketCreateFilter):
 
 @router.get('/ticket', summary="Get a filtered ticket")
 async def get_filtered_ticket(filter_ticket: GetTicketFilter = Depends()):
-    tickets = await db_get_filtered_ticket(**filter_ticket.__dict__)
+    filters = {key: value for key, value in filter_ticket.__dict__.items() if value is not None}
+
+    tickets = await db_get_filtered_ticket(**filters)
     if tickets:
         return {"status": "success", 'tickets': tickets}
     else:

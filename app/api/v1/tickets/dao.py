@@ -36,6 +36,7 @@ async def db_get_filtered_ticket(**kwargs):
     try:
         async with async_session_factory() as session:
             for key, value in kwargs.items():
+
                 if key != 'username':
                     kwargs[key] = value.value
 
