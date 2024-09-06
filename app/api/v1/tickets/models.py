@@ -22,7 +22,7 @@ class Tickets(Base):
     trade_type: Mapped[TradeTypes]
     link: Mapped[str]
     time_create: Mapped[date_joined]
-    exchange_id: Mapped[int] = mapped_column(ForeignKey('exchanges.id'))
+    exchange_id: Mapped[int] = mapped_column(ForeignKey('exchanges.id', ondelete="CASCADE"), nullable=False)
 
     exchange = relationship("Exchanges", back_populates="tickets")
 

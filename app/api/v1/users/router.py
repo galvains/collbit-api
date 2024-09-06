@@ -1,23 +1,16 @@
 from fastapi import APIRouter, HTTPException, Depends
 
-from app.api.v1.users.dao import db_get_all_users, db_get_user, db_upd_user, db_del_user, db_del_all_users
-from app.api.v1.users.schemas import UserRegistrationFilter, UserNewDataFilter, UserUpdateFilter
+from app.api.v1.users.dao import db_get_all_users, db_get_user_by_any_filter, db_upd_user, db_del_user, \
+    db_del_all_non_admin_users
+from app.api.v1.users.schemas import UserNewDataFilter, UserUpdateFilter
 from app.api.v1.users.models import User
-from app.api.v1.users.auth import is_default_user, is_admin_user
+from app.api.v1.users.auth import is_staff_user, is_admin_user
+
 router = APIRouter()
 
 
-# @router.post('/user', summary="Set new user")
-# async def set_new_user(user: UserRegistrationFilter):
-#     new_user = await db_add_new_user(**user.__dict__)
-#     if new_user:
-#         return {"status": "success", 'user': new_user}
-#     else:
-#         raise HTTPException(status_code=400, detail='User already exists')
-
-
 @router.get('/users', summary="Get all users")
-async def get_all_users():
+async def get_all_users(_: User = Depends(is_staff_user)):
     users = await db_get_all_users()
     if users:
         return {"status": "success", 'users': users}
@@ -26,8 +19,8 @@ async def get_all_users():
 
 
 @router.get('/user/{user_id}', summary="Get a filtered user")
-async def get_user(user_id: int):
-    user = await db_get_user(user_id)
+async def get_user(user_id: int, _: User = Depends(is_staff_user)):
+    user = await db_get_user_by_any_filter(id=user_id)
     if user:
         return {"status": "success", 'user': user}
     else:
@@ -35,16 +28,24 @@ async def get_user(user_id: int):
 
 
 @router.put('/user', summary="Update a user")
-async def update_user(user_update_filter: UserUpdateFilter, new_data: UserNewDataFilter):
-    updater_user = await db_upd_user(user_update_filter, new_data)
-    if updater_user:
-        return {"status": "success", 'user': updater_user}
+async def update_user(user_update_filter: UserUpdateFilter, new_data: UserNewDataFilter,
+                      _: User = Depends(is_staff_user)):
+    query = await db_get_user_by_any_filter(id=user_update_filter.user_id)
+    check_updated_user_role = query.to_dict()['role']
+
+    if _.role == 'staff':
+        if check_updated_user_role in ['staff', 'admin'] or new_data.role.value != check_updated_user_role:
+            raise HTTPException(status_code=403, detail='You are not an admin')
+
+    updated_user = await db_upd_user(user_update_filter, new_data)
+    if updated_user:
+        return {"status": "success", 'user': updated_user}
     else:
         raise HTTPException(status_code=404, detail='User not found')
 
 
 @router.delete('/user/{user_id}', summary="Delete a user")
-async def delete_user(user_id: int):
+async def delete_user(user_id: int, _: User = Depends(is_admin_user)):
     delete = await db_del_user(user_id)
     if delete:
         return {"status": "success"}
@@ -52,9 +53,9 @@ async def delete_user(user_id: int):
         raise HTTPException(status_code=400, detail="Error deleting user")
 
 
-@router.delete('/users', summary="Delete all users")
-async def delete_all_users():
-    delete_all = await db_del_all_users()
+@router.delete('/users', summary="Delete all non-admin users")
+async def delete_all_non_admin_users(_: User = Depends(is_admin_user)):
+    delete_all = await db_del_all_non_admin_users()
     if delete_all:
         return {"status": "success"}
     else:

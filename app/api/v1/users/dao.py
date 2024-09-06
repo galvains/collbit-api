@@ -1,12 +1,30 @@
 from datetime import datetime
 
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, update, delete, or_
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.api.v1.users.models import User
-from app.api.v1.users.schemas import UserRoles, UserUpdateFilter
+from app.api.v1.users.schemas import UserRoles
 from app.datebase import async_session_factory
 from app.api.v1.users.auth import get_password_hash
+
+
+async def create_admin():
+    await db_del_user(telegram_id=1000)
+    admin_payload = {
+        "telegram_id": 1000,
+        "username": "admin",
+        "password": get_password_hash("admin"),
+        "role": "admin"
+    }
+    try:
+        async with async_session_factory() as session:
+            admin = User(**admin_payload)
+            session.add(admin)
+            await session.commit()
+    except SQLAlchemyError as ex:
+        print({'message': ex})
+        await session.rollback()
 
 
 async def db_add_new_user(**kwargs):
@@ -68,17 +86,6 @@ async def db_upd_user(user_update_filter, new_data):
         await session.rollback()
 
 
-async def db_get_user(user_id):
-    try:
-        async with async_session_factory() as session:
-            query = await session.execute(select(User).filter_by(id=user_id))
-            user = query.scalars().first()
-            return user
-    except SQLAlchemyError as ex:
-        print({'message': ex})
-        await session.rollback()
-
-
 async def db_get_user_by_any_filter(**filter_by):
     try:
         async with async_session_factory() as session:
@@ -90,10 +97,10 @@ async def db_get_user_by_any_filter(**filter_by):
         await session.rollback()
 
 
-async def db_del_user(user_id):
+async def db_del_user(**filter_by):
     try:
         async with async_session_factory() as session:
-            deleted_count = await session.execute(delete(User).filter_by(id=user_id))
+            deleted_count = await session.execute(delete(User).filter_by(**filter_by))
             await session.commit()
 
             return deleted_count.rowcount > 0
@@ -102,10 +109,11 @@ async def db_del_user(user_id):
         await session.rollback()
 
 
-async def db_del_all_users():
+async def db_del_all_non_admin_users():
     try:
         async with async_session_factory() as session:
-            deleted_count = await session.execute(delete(User))
+            stmt = delete(User).where(or_(User.role == 'user', User.role == 'staff'))
+            deleted_count = await session.execute(stmt)
             await session.commit()
 
             return deleted_count.rowcount > 0

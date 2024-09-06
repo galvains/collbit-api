@@ -34,10 +34,10 @@ async def db_get_all_exchanges():
         await session.rollback()
 
 
-async def db_get_exchange(exchange_id: int):
+async def db_get_exchange_by_any_filter(**filter_by):
     try:
         async with async_session_factory() as session:
-            query = await session.execute(select(Exchanges).filter_by(id=exchange_id))
+            query = await session.execute(select(Exchanges).filter_by(**filter_by))
             exchange = query.scalars().first()
 
             return exchange

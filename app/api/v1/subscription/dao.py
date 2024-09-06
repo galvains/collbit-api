@@ -21,10 +21,10 @@ async def db_get_all_subscriptions():
         await session.rollback()
 
 
-async def db_get_subscription(subscription_id: int):
+async def db_get_subscription_by_any_filter(**filter_by):
     try:
         async with async_session_factory() as session:
-            query = await session.execute(select(Subscription).filter_by(id=subscription_id))
+            query = await session.execute(select(Subscription).filter_by(**filter_by))
             subscription = query.scalars().first()
 
             return subscription

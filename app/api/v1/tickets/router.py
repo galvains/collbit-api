@@ -2,6 +2,8 @@ from fastapi import APIRouter, HTTPException, Depends
 
 from app.api.v1.tickets.schemas import TicketCreateFilter, GetTicketFilter
 from app.api.v1.tickets.dao import *
+from app.api.v1.users.auth import is_admin_user, is_staff_user
+from app.api.v1.users.models import User
 
 router = APIRouter()
 
@@ -34,16 +36,16 @@ async def get_filtered_ticket(filter_ticket: GetTicketFilter = Depends()):
 
 
 @router.delete('/ticket/{ticket_id}', summary="Delete a ticket")
-async def delete_ticket(ticket_id: int):
-    delete = await db_del_ticket(ticket_id)
-    if delete:
+async def delete_ticket(ticket_id: int, _: User = Depends(is_staff_user)):
+    delete_ticket = await db_del_ticket(ticket_id)
+    if delete_ticket:
         return {"status": "success"}
     else:
         raise HTTPException(status_code=400, detail="Error deleting ticket")
 
 
 @router.delete('/tickets', summary="Delete all tickets")
-async def delete_all_tickets():
+async def delete_all_tickets(_: User = Depends(is_admin_user)):
     delete_all = await db_del_all_tickets()
     if delete_all:
         return {"status": "success"}

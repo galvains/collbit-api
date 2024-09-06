@@ -12,7 +12,7 @@ class User(Base):
     telegram_id: Mapped[int] = mapped_column(unique=True)
     username: Mapped[str] = mapped_column(unique=True)
     password: Mapped[str]
-    role: Mapped[str]
+    role: Mapped[str] = mapped_column(default="user")
     last_login: Mapped[last_login]
     date_joined: Mapped[date_joined]
     subscription_id: Mapped[int] = mapped_column(ForeignKey('subscriptions.id', ondelete='SET NULL'), nullable=True)

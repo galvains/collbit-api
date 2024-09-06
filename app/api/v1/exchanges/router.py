@@ -1,7 +1,9 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 
 from app.api.v1.exchanges.schemas import *
 from app.api.v1.exchanges.dao import *
+from app.api.v1.users.auth import is_admin_user
+from app.api.v1.users.models import User
 
 router = APIRouter()
 
@@ -17,7 +19,7 @@ async def get_all_exchanges():
 
 @router.get("/exchange/{exchange_id}", summary="Get exchange")
 async def get_all_exchanges(exchange_id: int):
-    exchange = await db_get_exchange(exchange_id)
+    exchange = await db_get_exchange_by_any_filter(id=exchange_id)
     if exchange:
         return {"status": "success", 'exchange': exchange}
     else:
@@ -25,7 +27,7 @@ async def get_all_exchanges(exchange_id: int):
 
 
 @router.post("/exchange", summary="Set new exchange")
-async def create_exchange(exchange: ExchangeCreateFilter):
+async def create_exchange(exchange: ExchangeCreateFilter, _: User = Depends(is_admin_user)):
     new_exchange = await db_add_new_exchange(**exchange.__dict__)
     if new_exchange:
         return {"status": "success", 'exchange': new_exchange}
@@ -34,9 +36,9 @@ async def create_exchange(exchange: ExchangeCreateFilter):
 
 
 @router.delete('/exchange/{exchange_id}', summary="Delete a exchange")
-async def delete_exchange(exchange_id: int):
-    delete = await db_del_exchange(exchange_id)
-    if delete:
+async def delete_exchange(exchange_id: int, _: User = Depends(is_admin_user)):
+    delete_exchange = await db_del_exchange(exchange_id)
+    if delete_exchange:
         return {"status": "success"}
     else:
         raise HTTPException(status_code=400, detail="Error deleting exchange")
@@ -44,7 +46,7 @@ async def delete_exchange(exchange_id: int):
 
 @router.put('/exchange', summary="Update a exchange")
 async def update_exchange(exchange_update_filter: ExchangeUpdateFilter,
-                          new_data: ExchangeNewDataFilter):
+                          new_data: ExchangeNewDataFilter, _: User = Depends(is_admin_user)):
     updater_exchange = await db_upd_exchange(exchange_update_filter, new_data)
     if updater_exchange:
         return {"status": "success", 'exchange': updater_exchange}

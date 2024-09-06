@@ -13,7 +13,7 @@ class UserRegistrationFilter(BaseModel):
     telegram_id: int
     username: str
     password: str | None
-    role: UserRoles
+    # role: UserRoles
 
 
 class UserUpdateFilter(BaseModel):

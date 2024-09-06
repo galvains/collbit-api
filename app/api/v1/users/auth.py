@@ -48,7 +48,7 @@ async def authenticate_user(telegram_id: int, password: str):
 
 
 async def is_default_user(token: str = Depends(get_token)):
-    from app.api.v1.users.dao import db_get_user
+    from app.api.v1.users.dao import db_get_user_by_any_filter
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     except JWTError as ex:
@@ -63,11 +63,17 @@ async def is_default_user(token: str = Depends(get_token)):
     if not user_id:
         raise HTTPException(status_code=401, detail="User's id not found")
 
-    user = await db_get_user(int(user_id))
+    user = await db_get_user_by_any_filter(id=int(user_id))
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
 
     return user
+
+
+async def is_staff_user(current_user: User = Depends(is_default_user)):
+    if current_user.role in ['staff', 'admin']:
+        return current_user
+    raise HTTPException(status_code=401, detail="Not enough permissions")
 
 
 async def is_admin_user(current_user: User = Depends(is_default_user)):
@@ -103,12 +109,6 @@ async def logout_user(response: Response):
     return {"status": "success", 'message': "User logged out"}
 
 
-# @router.get('/me')
-# async def get_me(user_data: User = Depends(is_default_user)):
-#     return user_data
-#
-#
-# @router.get('/all_users')
-# async def get_all_users(user_data: User = Depends(get_current_admin_user)):
-#     from app.api.v1.users.dao import db_get_all_users
-#     return await db_get_all_users()
+@router.get("/me/")
+async def get_me(user_data: User = Depends(is_default_user)):
+    return user_data

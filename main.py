@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
+from app.api.v1.users.dao import create_admin
 from app.api.v1.exchanges.dao import init_exchanges
 from app.api.v1.tickets.dao import init_debug_tickets
 from app.datebase import Base, engine
@@ -13,6 +14,7 @@ async def lifespan(app: FastAPI):
         await conn.run_sync(Base.metadata.create_all)
     await init_exchanges()
     await init_debug_tickets()
+    await create_admin()
 
     yield
 

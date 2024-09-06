@@ -7,10 +7,11 @@ from .subscription.router import router as subscription_router
 from .exchanges.router import router as exchanges_router
 
 api_router = APIRouter(dependencies=[Depends(is_default_user)])
-auth_router = APIRouter()
+
 api_router.include_router(users_router, tags=["Users"])
 api_router.include_router(tickets_router, tags=["Tickets"])
 api_router.include_router(subscription_router, tags=["Subscription"])
 api_router.include_router(exchanges_router, tags=["Exchanges"])
 
+auth_router = APIRouter()
 auth_router.include_router(_router, tags=["Auth"])
