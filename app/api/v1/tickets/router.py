@@ -18,8 +18,8 @@ async def get_all_tickets():
 
 
 @router.post('/ticket', summary="Set new ticket")
-async def set_new_ticket(ticket: TicketCreateFilter):
-    new_ticket = await db_add_new_ticket(**ticket.__dict__)
+async def set_new_ticket(filter_by: TicketCreateFilter):
+    new_ticket = await db_add_new_ticket(**filter_by.model_dump())
     if new_ticket:
         return {"status": "success", 'ticket_id': new_ticket}
     else:
@@ -28,9 +28,9 @@ async def set_new_ticket(ticket: TicketCreateFilter):
 
 @router.get('/ticket', summary="Get a filtered ticket")
 async def get_filtered_ticket(filter_ticket: GetTicketFilter = Depends()):
-    filters = {key: value for key, value in filter_ticket.__dict__.items() if value is not None}
+    filter_by = {key: value for key, value in filter_ticket.model_dump().items() if value is not None}
 
-    tickets = await db_get_filtered_ticket(**filters)
+    tickets = await db_get_filtered_ticket(**filter_by)
     if tickets:
         return {"status": "success", 'tickets': tickets}
     else:

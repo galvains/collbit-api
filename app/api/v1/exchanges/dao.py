@@ -46,16 +46,16 @@ async def db_get_exchange_by_any_filter(**filter_by):
         await session.rollback()
 
 
-async def db_add_new_exchange(**kwargs):
+async def db_add_new_exchange(**filter_by):
     try:
         async with async_session_factory() as session:
 
-            query = await session.execute(select(Exchanges).filter_by(name=kwargs['name']))
+            query = await session.execute(select(Exchanges).filter_by(name=filter_by['name']))
             check_exchange = query.scalars().one_or_none()
             if check_exchange:
                 return False
 
-            new_exchange = Exchanges(**kwargs)
+            new_exchange = Exchanges(**filter_by)
             session.add(new_exchange)
 
             await session.commit()

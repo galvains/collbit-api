@@ -33,14 +33,14 @@ async def db_get_subscription_by_any_filter(**filter_by):
         await session.rollback()
 
 
-async def db_add_new_subscription(**kwargs):
-    for key, value in kwargs.items():
+async def db_add_new_subscription(**filter_by):
+    for key, value in filter_by.items():
         if isinstance(value, TypesSubscription):
-            kwargs[key] = value.value
+            filter_by[key] = value.value
         if isinstance(value, datetime):
-            kwargs[key] = value.replace(tzinfo=None)
+            filter_by[key] = value.replace(tzinfo=None)
 
-    user_id = kwargs.pop('user_id')
+    user_id = filter_by.pop('user_id')
 
     try:
         async with async_session_factory() as session:
@@ -49,7 +49,7 @@ async def db_add_new_subscription(**kwargs):
             if user is None:
                 return False
 
-            new_subscription = Subscription(**kwargs)
+            new_subscription = Subscription(**filter_by)
             session.add(new_subscription)
 
             await session.commit()

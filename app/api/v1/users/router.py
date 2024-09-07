@@ -46,7 +46,7 @@ async def update_user(user_update_filter: UserUpdateFilter, new_data: UserNewDat
 
 @router.delete('/user/{user_id}', summary="Delete a user")
 async def delete_user(user_id: int, _: User = Depends(is_admin_user)):
-    delete = await db_del_user(user_id)
+    delete = await db_del_user(id=user_id)
     if delete:
         return {"status": "success"}
     else:

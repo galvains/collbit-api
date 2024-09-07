@@ -86,7 +86,7 @@ async def is_admin_user(current_user: User = Depends(is_default_user)):
 async def register_user(user_data: UserRegistrationFilter):
     from app.api.v1.users.dao import db_add_new_user
 
-    new_user = await db_add_new_user(**user_data.__dict__)
+    new_user = await db_add_new_user(**user_data.model_dump())
     if new_user:
         return {"status": "success", 'user': new_user}
     else:
@@ -109,6 +109,6 @@ async def logout_user(response: Response):
     return {"status": "success", 'message': "User logged out"}
 
 
-@router.get("/me/")
+@router.get("/me")
 async def get_me(user_data: User = Depends(is_default_user)):
     return user_data

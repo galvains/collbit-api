@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 from sqlalchemy import select, update, delete, or_
@@ -8,13 +9,17 @@ from app.api.v1.users.schemas import UserRoles
 from app.datebase import async_session_factory
 from app.api.v1.users.auth import get_password_hash
 
+ADMIN_TELEGRAM_ID = int(os.getenv("ADMIN_TELEGRAM_ID"))
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
+
 
 async def create_admin():
-    await db_del_user(telegram_id=1000)
+    await db_del_user(telegram_id=ADMIN_TELEGRAM_ID)
     admin_payload = {
-        "telegram_id": 1000,
-        "username": "admin",
-        "password": get_password_hash("admin"),
+        "telegram_id": ADMIN_TELEGRAM_ID,
+        "username": ADMIN_USERNAME,
+        "password": get_password_hash(ADMIN_PASSWORD),
         "role": "admin"
     }
     try:
@@ -27,15 +32,15 @@ async def create_admin():
         await session.rollback()
 
 
-async def db_add_new_user(**kwargs):
-    kwargs['password'] = get_password_hash(kwargs['password'])
+async def db_add_new_user(**filter_by):
+    filter_by['password'] = get_password_hash(filter_by['password'])
 
-    if isinstance(kwargs.get('role'), UserRoles):
-        kwargs['role'] = kwargs['role'].value
+    if isinstance(filter_by.get('role'), UserRoles):
+        filter_by['role'] = filter_by['role'].value
 
     try:
         async with async_session_factory() as session:
-            new_user = User(**kwargs)
+            new_user = User(**filter_by)
             session.add(new_user)
             await session.commit()
             await session.refresh(new_user)

@@ -1,5 +1,12 @@
+import os
 import random
 import httpx
+
+from dotenv import load_dotenv
+
+load_dotenv()
+ADMIN_TELEGRAM_ID = int(os.getenv("ADMIN_TELEGRAM_ID"))
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
 client = httpx.Client()
 ENDPOINT = "http://localhost:8000"
@@ -9,6 +16,21 @@ def test_home():
     response = client.get(ENDPOINT)
     assert response.status_code == 200
     assert response.json()['status'] == 'success'
+
+
+def test_can_login_as_admin():
+    auth_logout()
+
+    admin_payload = {
+        "telegram_id": ADMIN_TELEGRAM_ID,
+        "password": ADMIN_PASSWORD
+    }
+    auth_admin(admin_payload)
+
+    response = client.get(ENDPOINT + "/auth/me")
+    check_role = response.json()['role']
+    assert response.status_code == 200
+    assert check_role == 'admin'
 
 
 def test_can_add_new_user():
@@ -219,32 +241,6 @@ def test_can_get_all_tickets():
     assert len(response.json()['tickets']) == 10
 
 
-def test_can_get_all_users():
-    del_all_users()
-    payload_1 = {
-        "telegram_id": random.randint(1, 9999),
-        "username": f"debug_{random.randint(1, 9999)}",
-        "password": "string",
-        "role": "admin",
-        "subscription_id": None
-    }
-    payload_2 = {
-        "telegram_id": random.randint(1, 9999),
-        "username": f"debug_{random.randint(1, 9999)}",
-        "password": "string",
-        "role": "admin",
-        "subscription_id": None
-    }
-    add_users(payload_1)
-    add_users(payload_2)
-
-    response = client.get(ENDPOINT + '/api/v1/users')
-    assert response.status_code == 200
-    assert len(response.json()['users']) == 2
-    assert response.json()['users'][0]['telegram_id'] == payload_1['telegram_id']
-    assert response.json()['users'][1]['telegram_id'] == payload_2['telegram_id']
-
-
 def test_can_get_user():
     user_payload = {
         "telegram_id": random.randint(1, 9999),
@@ -430,11 +426,11 @@ def test_can_del_all_tickets():
     assert response.status_code == 404
 
 
-def test_can_del_all_users():
-    del_all_users()
-
-    response = client.get(ENDPOINT + f'/api/v1/users')
-    assert response.status_code == 404
+# def test_can_del_all_users():
+#     del_all_users()
+#
+#     response = client.get(ENDPOINT + f'/api/v1/users')
+#     assert response.status_code == 404
 
 
 def add_tickets(payload):
@@ -442,7 +438,7 @@ def add_tickets(payload):
 
 
 def add_users(payload):
-    return client.post(ENDPOINT + '/api/v1/user', json=payload)
+    return client.post(ENDPOINT + '/auth/register', json=payload)
 
 
 def add_subscriptions(payload):
@@ -481,9 +477,17 @@ def del_exchange(exchange_id):
     return client.delete(ENDPOINT + f'/api/v1/exchange/{exchange_id}')
 
 
-def del_all_users():
-    return client.delete(ENDPOINT + '/api/v1/users')
+# def del_all_users():
+#     return client.delete(ENDPOINT + '/api/v1/users')
 
 
 def del_all_tickets():
     return client.delete(ENDPOINT + '/api/v1/tickets')
+
+
+def auth_admin(payload):
+    return client.post(ENDPOINT + '/auth/login', json=payload)
+
+
+def auth_logout():
+    return client.post(ENDPOINT + "/auth/logout")

@@ -28,7 +28,7 @@ async def get_all_exchanges(exchange_id: int):
 
 @router.post("/exchange", summary="Set new exchange")
 async def create_exchange(exchange: ExchangeCreateFilter, _: User = Depends(is_admin_user)):
-    new_exchange = await db_add_new_exchange(**exchange.__dict__)
+    new_exchange = await db_add_new_exchange(**exchange.model_dump())
     if new_exchange:
         return {"status": "success", 'exchange': new_exchange}
     else:

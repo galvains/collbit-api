@@ -27,7 +27,7 @@ async def get_all_subscriptions(subscription_id: int, _: User = Depends(is_staff
 
 @router.post("/subscription", summary="Set new subscription")
 async def create_subscription(subscription: SubscriptionCreateFilter, _: User = Depends(is_staff_user)):
-    new_subscription = await db_add_new_subscription(**subscription.__dict__)
+    new_subscription = await db_add_new_subscription(**subscription.model_dump())
     if new_subscription:
         return {"status": "success", 'subscription': new_subscription}
     else:

@@ -32,15 +32,15 @@ async def db_get_all_tickets():
         await session.rollback()
 
 
-async def db_get_filtered_ticket(**kwargs):
+async def db_get_filtered_ticket(**filter_by):
     try:
         async with async_session_factory() as session:
-            for key, value in kwargs.items():
+            for key, value in filter_by.items():
 
                 if key != 'username':
-                    kwargs[key] = value.value
+                    filter_by[key] = value.value
 
-            query = await session.execute(select(Tickets).filter_by(**kwargs))
+            query = await session.execute(select(Tickets).filter_by(**filter_by))
             filtered_tickets = query.scalars().all()
 
             return filtered_tickets
@@ -50,11 +50,11 @@ async def db_get_filtered_ticket(**kwargs):
         await session.rollback()
 
 
-async def db_add_new_ticket(**kwargs):
-    kwargs['link'] = str(kwargs['link'])
+async def db_add_new_ticket(**filter_by):
+    filter_by['link'] = str(filter_by['link'])
     try:
         async with async_session_factory() as session:
-            new_ticket = Tickets(**kwargs)
+            new_ticket = Tickets(**filter_by)
             session.add(new_ticket)
             await session.commit()
             return new_ticket.id
