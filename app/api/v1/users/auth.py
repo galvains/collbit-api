@@ -1,19 +1,19 @@
-import os
-
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, HTTPException, Response, Request, Depends
 
-from app.api.v1.users.schemas import UserRegistrationFilter, UserAuthFilter
+from app.api.v1.users.schemas import UserRegistrationFilter, UserAuthFilter, UserRoles
 from app.api.v1.users.models import User
+
+from app.config import get_secret_key, get_algorithm
 
 router = APIRouter()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = os.getenv("ALGORITHM")
+SECRET_KEY = get_secret_key()
+ALGORITHM = get_algorithm()
 
 
 def create_access_token(data: dict) -> str:
@@ -73,13 +73,13 @@ async def is_default_user(token: str = Depends(get_token)):
 
 
 async def is_staff_user(current_user: User = Depends(is_default_user)):
-    if current_user.role in ['staff', 'admin']:
+    if current_user.role in [UserRoles.staff, UserRoles.admin]:
         return current_user
     raise HTTPException(status_code=401, detail="Not enough permissions")
 
 
 async def is_admin_user(current_user: User = Depends(is_default_user)):
-    if current_user.role == 'admin':
+    if current_user.role == UserRoles.admin:
         return current_user
     raise HTTPException(status_code=403, detail="Not enough permissions")
 

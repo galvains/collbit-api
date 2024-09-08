@@ -1,6 +1,4 @@
-import os
 from datetime import datetime
-
 from sqlalchemy import select, update, delete, or_
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -9,9 +7,11 @@ from app.api.v1.users.schemas import UserRoles
 from app.datebase import async_session_factory
 from app.api.v1.users.auth import get_password_hash
 
-ADMIN_TELEGRAM_ID = int(os.getenv("ADMIN_TELEGRAM_ID"))
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
-ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
+from app.config import admin as admin_data
+
+ADMIN_TELEGRAM_ID = admin_data.telegram_id
+ADMIN_PASSWORD = admin_data.password
+ADMIN_USERNAME = admin_data.username
 
 
 async def create_admin():

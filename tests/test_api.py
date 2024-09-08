@@ -1,12 +1,10 @@
-import os
 import random
 import httpx
 
-from dotenv import load_dotenv
+from app.config import admin
 
-load_dotenv()
-ADMIN_TELEGRAM_ID = int(os.getenv("ADMIN_TELEGRAM_ID"))
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+ADMIN_TELEGRAM_ID = admin.telegram_id
+ADMIN_PASSWORD = admin.password
 
 client = httpx.Client()
 ENDPOINT = "http://localhost:8000"
