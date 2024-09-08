@@ -1,7 +1,10 @@
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from starlette.requests import Request
+from starlette_admin.tools.iter import escape
 
 from app.datebase import Base, int_pk, last_login, date_joined
+from app.api.v1.users.schemas import UserRoles
 from app.api.v1.subscription.models import Subscription
 
 
@@ -12,7 +15,7 @@ class User(Base):
     telegram_id: Mapped[int] = mapped_column(unique=True)
     username: Mapped[str] = mapped_column(unique=True)
     password: Mapped[str]
-    role: Mapped[str] = mapped_column(default="user")
+    role: Mapped[UserRoles] = mapped_column(default="user")
     last_login: Mapped[last_login]
     date_joined: Mapped[date_joined]
     subscription_id: Mapped[int] = mapped_column(ForeignKey('subscriptions.id', ondelete='SET NULL'), nullable=True)
@@ -37,3 +40,6 @@ class User(Base):
             "date_joined": self.date_joined,
             "subscription_id": self.subscription_id,
         }
+
+    async def __admin_select2_repr__(self, request: Request) -> str:
+        return f'<div><b>id:</b> <span>{escape(str(self.id))}</span> <b>username:</b> <span>{escape(self.username)}</span> <b>telegram_id:</b> <span>{escape(str(self.telegram_id))}</span></div>'

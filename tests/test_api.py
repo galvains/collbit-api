@@ -43,6 +43,7 @@ def test_can_add_new_user():
     }
     user_filter = add_users(payload).json()['user']['id']
     response = client.get(ENDPOINT + f'/api/v1/user/{user_filter}')
+    print(response)
     assert response.status_code == 200
     assert response.json()['user']['id'] == user_filter
 

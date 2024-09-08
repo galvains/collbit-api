@@ -5,7 +5,7 @@ from app.api.v1.tickets.schemas import CurrencyTypes, CoinTypes, TradeTypes
 from app.datebase import Base, int_pk, date_joined
 
 
-class Tickets(Base):
+class Ticket(Base):
     __tablename__ = 'tickets'
 
     id: Mapped[int_pk]
@@ -24,7 +24,7 @@ class Tickets(Base):
     time_create: Mapped[date_joined]
     exchange_id: Mapped[int] = mapped_column(ForeignKey('exchanges.id', ondelete="CASCADE"), nullable=False)
 
-    exchange = relationship("Exchanges", back_populates="tickets")
+    exchange = relationship("Exchange", back_populates="tickets")
 
     def __str__(self):
         return (f"{self.__class__.__name__}(id={self.id}, "

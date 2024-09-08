@@ -17,5 +17,5 @@ async_session_factory = async_sessionmaker(bind=engine, expire_on_commit=False)
 
 int_pk = Annotated[int, mapped_column(primary_key=True, autoincrement=True)]
 date_joined = Annotated[datetime, mapped_column(server_default=func.now())]
-last_login = Annotated[datetime, mapped_column(server_default=func.now(), onupdate=datetime.now)]
+last_login = Annotated[datetime, mapped_column(onupdate=datetime.now, nullable=True)]
 

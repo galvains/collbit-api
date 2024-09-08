@@ -40,10 +40,12 @@ def get_token(request: Request):
 
 
 async def authenticate_user(telegram_id: int, password: str):
-    from app.api.v1.users.dao import db_get_user_by_any_filter
+    from app.api.v1.users.dao import db_get_user_by_any_filter, db_upd_user
     user = await db_get_user_by_any_filter(telegram_id=telegram_id)
     if not user or verify_password(plain_password=password, hashed_password=user.password) is False:
         return None
+
+    await db_upd_user(user_update_filter=user.id, new_data={'last_login': datetime.now()})
     return user
 
 

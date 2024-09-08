@@ -24,7 +24,7 @@ class UserNewDataFilter(BaseModel):
     username: str
     password: str
     role: UserRoles
-    last_login: datetime
+    last_login: datetime | None
     subscription_id: int | None
 
 

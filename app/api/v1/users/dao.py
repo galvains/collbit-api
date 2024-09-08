@@ -64,24 +64,38 @@ async def db_get_all_users():
 
 async def db_upd_user(user_update_filter, new_data):
     try:
-
-        user_id = user_update_filter.user_id
+        if isinstance(user_update_filter, int):
+            user_id = user_update_filter
+        else:
+            user_id = user_update_filter.user_id
 
         async with async_session_factory() as session:
             query = await session.execute(select(User).filter_by(id=user_id))
             check_user = query.scalars().one_or_none()
 
             if check_user:
-                for key, value in new_data:
+                if isinstance(user_update_filter, int):
+                    for key, value in new_data.items():
 
-                    if isinstance(value, UserRoles):
-                        value = value.value
-                    if isinstance(value, datetime):
-                        value = value.replace(tzinfo=None)
-                    if key == 'password':
-                        value = get_password_hash(value)
+                        if isinstance(value, UserRoles):
+                            value = value.value
+                        if isinstance(value, datetime):
+                            value = value.replace(tzinfo=None)
+                        if key == 'password':
+                            value = get_password_hash(value)
 
-                    await session.execute(update(User).where(User.id == user_id).values({key: value}))
+                        await session.execute(update(User).where(User.id == user_id).values({key: value}))
+                else:
+                    for key, value in new_data:
+
+                        if isinstance(value, UserRoles):
+                            value = value.value
+                        if isinstance(value, datetime):
+                            value = value.replace(tzinfo=None)
+                        if key == 'password':
+                            value = get_password_hash(value)
+
+                        await session.execute(update(User).where(User.id == user_id).values({key: value}))
 
                 await session.commit()
                 await session.refresh(check_user)
