@@ -31,20 +31,9 @@ admin = Admin(
     password=settings.ADMIN_PASSWORD
 )
 
+
 def get_db_url():
     return f"postgresql+asyncpg://{settings.DB_USER}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
-
-
-# def get_admin_password():
-#     return settings.ADMIN_PASSWORD
-#
-#
-# def get_admin_telegram_id():
-#     return settings.ADMIN_TELEGRAM_ID
-#
-#
-# def get_admin_username():
-#     return settings.ADMIN_USERNAME
 
 
 def get_secret_key():

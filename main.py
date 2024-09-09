@@ -9,7 +9,7 @@ from app.api.v1.tickets.dao import init_debug_tickets
 
 from app.datebase import Base, engine
 from app.api.v1 import api_router as router_v1, auth_router as auth_router
-from app.admin import admin
+from app.admin.admin import admin
 from app.config import get_secret_key
 
 SECRET_KEY = get_secret_key()
