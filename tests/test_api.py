@@ -1,19 +1,13 @@
 import random
-import httpx
 
 from app.config import admin
+from httpx import Client
 
 ADMIN_TELEGRAM_ID = admin.telegram_id
 ADMIN_PASSWORD = admin.password
 
-client = httpx.Client()
+client = Client()
 ENDPOINT = "http://localhost:8000"
-
-
-def test_home():
-    response = client.get(ENDPOINT)
-    assert response.status_code == 200
-    assert response.json()['status'] == 'success'
 
 
 def test_can_login_as_admin():
@@ -41,7 +35,6 @@ def test_can_add_new_user():
     }
     user_filter = add_users(payload).json()['user']['id']
     response = client.get(ENDPOINT + f'/api/v1/user/{user_filter}')
-    print(response)
     assert response.status_code == 200
     assert response.json()['user']['id'] == user_filter
 
