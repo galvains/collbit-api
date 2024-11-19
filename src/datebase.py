@@ -5,7 +5,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import declarative_base, mapped_column
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
-from app.config import get_db_url
+from src.config import get_db_url
 
 DATABASE_URL = get_db_url()
 Base = declarative_base()

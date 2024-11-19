@@ -1,6 +1,6 @@
 import random
 
-from app.config import admin
+from src.config import admin
 from httpx import Client
 
 ADMIN_TELEGRAM_ID = admin.telegram_id
@@ -418,13 +418,6 @@ def test_can_del_all_tickets():
     assert response.status_code == 404
 
 
-# def test_can_del_all_users():
-#     del_all_users()
-#
-#     response = client.get(ENDPOINT + f'/api/v1/users')
-#     assert response.status_code == 404
-
-
 def add_tickets(payload):
     return client.post(ENDPOINT + '/api/v1/ticket', json=payload)
 
@@ -467,10 +460,6 @@ def del_subscription(subscription_id):
 
 def del_exchange(exchange_id):
     return client.delete(ENDPOINT + f'/api/v1/exchange/{exchange_id}')
-
-
-# def del_all_users():
-#     return client.delete(ENDPOINT + '/api/v1/users')
 
 
 def del_all_tickets():

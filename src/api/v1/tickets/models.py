@@ -1,8 +1,8 @@
 from sqlalchemy import ForeignKey, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.api.v1.tickets.schemas import CurrencyTypes, CoinTypes, TradeTypes
-from app.datebase import Base, int_pk, date_joined
+from src.api.v1.tickets.schemas import CurrencyTypes, CoinTypes, TradeTypes
+from src.datebase import Base, int_pk, date_joined
 
 
 class Ticket(Base):

@@ -1,7 +1,7 @@
 from sqlalchemy import func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.api.v1.subscription.schemas import *
-from app.datebase import Base, int_pk
+from src.api.v1.subscription.schemas import *
+from src.datebase import Base, int_pk
 
 
 class Subscription(Base):

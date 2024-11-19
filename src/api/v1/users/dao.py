@@ -2,12 +2,12 @@ from datetime import datetime
 from sqlalchemy import select, update, delete, or_
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.api.v1.users.models import User
-from app.api.v1.users.schemas import UserRoles
-from app.datebase import async_session_factory
-from app.api.v1.users.auth import get_password_hash
+from src.api.v1.users.models import User
+from src.api.v1.users.schemas import UserRoles
+from src.datebase import async_session_factory
+from src.api.v1.users.auth import get_password_hash
 
-from app.config import admin as admin_data
+from src.config import admin as admin_data
 
 ADMIN_TELEGRAM_ID = admin_data.telegram_id
 ADMIN_PASSWORD = admin_data.password

@@ -1,12 +1,12 @@
-from app.api.v1.users.models import User
-from app.api.v1.tickets.models import Ticket
-from app.api.v1.subscription.models import Subscription
-from app.api.v1.exchanges.models import Exchange
+from src.api.v1.users.models import User
+from src.api.v1.tickets.models import Ticket
+from src.api.v1.subscription.models import Subscription
+from src.api.v1.exchanges.models import Exchange
 
-from app.admin.views import UserView, TicketView, SubscriptionView, ExchangeView
-from app.admin.auth import UsernameAndPasswordProvider
+from src.admin.views import UserView, TicketView, SubscriptionView, ExchangeView
+from src.admin.auth import UsernameAndPasswordProvider
 
-from app.datebase import engine
+from src.datebase import engine
 
 from starlette_admin.contrib.sqla import Admin
 

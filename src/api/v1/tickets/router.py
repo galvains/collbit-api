@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException, Depends
 
-from app.api.v1.tickets.schemas import TicketCreateFilter, GetTicketFilter
-from app.api.v1.tickets.dao import *
-from app.api.v1.users.auth import is_admin_user, is_staff_user
-from app.api.v1.users.models import User
+from src.api.v1.tickets.schemas import TicketCreateFilter, GetTicketFilter
+from src.api.v1.tickets.dao import *
+from src.api.v1.users.auth import is_admin_user, is_staff_user
+from src.api.v1.users.models import User
 
 router = APIRouter()
 

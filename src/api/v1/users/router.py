@@ -1,10 +1,10 @@
 from fastapi import APIRouter, HTTPException, Depends
 
-from app.api.v1.users.dao import db_get_all_users, db_get_user_by_any_filter, db_upd_user, db_del_user, \
+from src.api.v1.users.dao import db_get_all_users, db_get_user_by_any_filter, db_upd_user, db_del_user, \
     db_del_all_non_admin_users
-from app.api.v1.users.schemas import UserNewDataFilter, UserUpdateFilter
-from app.api.v1.users.models import User
-from app.api.v1.users.auth import is_staff_user, is_admin_user
+from src.api.v1.users.schemas import UserNewDataFilter, UserUpdateFilter
+from src.api.v1.users.models import User
+from src.api.v1.users.auth import is_staff_user, is_admin_user
 
 router = APIRouter()
 

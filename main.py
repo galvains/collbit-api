@@ -3,14 +3,14 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from contextlib import asynccontextmanager
 
-from app.api.v1.users.dao import create_admin
-from app.api.v1.exchanges.dao import init_exchanges
-from app.api.v1.tickets.dao import init_debug_tickets
+from src.api.v1.users.dao import create_admin
+from src.api.v1.exchanges.dao import init_exchanges
+from src.api.v1.tickets.dao import init_debug_tickets
 
-from app.datebase import Base, engine
-from app.api.v1 import api_router as router_v1, auth_router as auth_router
-from app.admin.admin import admin
-from app.config import get_secret_key
+from src.datebase import Base, engine
+from src.api.v1 import api_router as router_v1, auth_router as auth_router
+from src.admin.admin import admin
+from src.config import get_secret_key
 
 SECRET_KEY = get_secret_key()
 

@@ -1,9 +1,9 @@
 from sqlalchemy import delete, select
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.api.v1.tickets.models import Ticket
-from app.datebase import async_session_factory
-from app.utils import generate_random_ticket
+from src.api.v1.tickets.models import Ticket
+from src.datebase import async_session_factory
+from src.utils import generate_random_ticket
 
 
 async def init_debug_tickets():

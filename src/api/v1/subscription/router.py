@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends
 
-from app.api.v1.subscription.schemas import *
-from app.api.v1.subscription.dao import *
-from app.api.v1.users.auth import is_staff_user
+from src.api.v1.subscription.schemas import *
+from src.api.v1.subscription.dao import *
+from src.api.v1.users.auth import is_staff_user
 
 router = APIRouter()
 

@@ -4,10 +4,10 @@ from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, HTTPException, Response, Request, Depends
 
-from app.api.v1.users.schemas import UserRegistrationFilter, UserAuthFilter, UserRoles
-from app.api.v1.users.models import User
+from src.api.v1.users.schemas import UserRegistrationFilter, UserAuthFilter, UserRoles
+from src.api.v1.users.models import User
 
-from app.config import get_secret_key, get_algorithm
+from src.config import get_secret_key, get_algorithm
 
 router = APIRouter()
 
@@ -40,7 +40,7 @@ def get_token(request: Request):
 
 
 async def authenticate_user(telegram_id: int, password: str):
-    from app.api.v1.users.dao import db_get_user_by_any_filter, db_upd_user
+    from src.api.v1.users.dao import db_get_user_by_any_filter, db_upd_user
     user = await db_get_user_by_any_filter(telegram_id=telegram_id)
     if not user or verify_password(plain_password=password, hashed_password=user.password) is False:
         return None
@@ -50,7 +50,7 @@ async def authenticate_user(telegram_id: int, password: str):
 
 
 async def is_default_user(token: str = Depends(get_token)):
-    from app.api.v1.users.dao import db_get_user_by_any_filter
+    from src.api.v1.users.dao import db_get_user_by_any_filter
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     except JWTError as ex:
@@ -86,7 +86,7 @@ async def is_admin_user(current_user: User = Depends(is_default_user)):
 
 @router.post("/register")
 async def register_user(user_data: UserRegistrationFilter):
-    from app.api.v1.users.dao import db_add_new_user
+    from src.api.v1.users.dao import db_add_new_user
 
     new_user = await db_add_new_user(**user_data.model_dump())
     if new_user:

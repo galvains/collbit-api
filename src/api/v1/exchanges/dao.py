@@ -1,8 +1,8 @@
 from sqlalchemy import select, delete, update
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.api.v1.exchanges.models import Exchange
-from app.datebase import async_session_factory
+from src.api.v1.exchanges.models import Exchange
+from src.datebase import async_session_factory
 
 
 async def init_exchanges():

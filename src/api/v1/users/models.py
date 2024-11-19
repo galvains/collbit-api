@@ -3,9 +3,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from starlette.requests import Request
 from starlette_admin.tools.iter import escape
 
-from app.datebase import Base, int_pk, last_login, date_joined
-from app.api.v1.users.schemas import UserRoles
-from app.api.v1.subscription.models import Subscription
+from src.datebase import Base, int_pk, last_login, date_joined
+from src.api.v1.users.schemas import UserRoles
+from src.api.v1.subscription.models import Subscription
 
 
 class User(Base):

@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Mapped, relationship, mapped_column
 
-from app.datebase import Base, int_pk
+from src.datebase import Base, int_pk
 
 
 class Exchange(Base):

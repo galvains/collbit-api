@@ -3,10 +3,10 @@ from datetime import datetime
 from sqlalchemy import select, delete, update
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.api.v1.subscription.models import Subscription
-from app.api.v1.subscription.schemas import TypesSubscription
-from app.api.v1.users.models import User
-from app.datebase import async_session_factory
+from src.api.v1.subscription.models import Subscription
+from src.api.v1.subscription.schemas import TypesSubscription
+from src.api.v1.users.models import User
+from src.datebase import async_session_factory
 
 
 async def db_get_all_subscriptions():

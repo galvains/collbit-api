@@ -3,11 +3,11 @@ from typing import Dict, Any
 
 from starlette_admin.contrib.sqla import ModelView
 
-from app.api.v1.users.auth import get_password_hash
-from app.api.v1.users.models import User
-from app.api.v1.tickets.models import Ticket
-from app.api.v1.exchanges.models import Exchange
-from app.api.v1.subscription.models import Subscription
+from src.api.v1.users.auth import get_password_hash
+from src.api.v1.users.models import User
+from src.api.v1.tickets.models import Ticket
+from src.api.v1.exchanges.models import Exchange
+from src.api.v1.subscription.models import Subscription
 
 
 class UserView(ModelView):
