@@ -1,3 +1,5 @@
+import uvicorn
+
 from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -37,3 +39,7 @@ app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 @app.get('/', tags=['Main'])
 async def index():
     return {"status": "success", 'message': 'Hello, world!'}
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")

@@ -1,0 +1,35 @@
+services:
+
+  api:
+    image: python:3.12.7
+    container_name: api
+    restart: always
+    ports:
+      - "80:8000"
+    volumes:
+      - ./:/src
+    working_dir: /src
+    entrypoint: ./entrypoint.sh
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+
+  db:
+    image: postgres:16-alpine
+    container_name: db
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    env_file:
+      - .env
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 2s
+      timeout: 10s
+      retries: 3
+
+
